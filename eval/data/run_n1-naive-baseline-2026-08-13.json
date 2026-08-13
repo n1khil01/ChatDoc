@@ -1,0 +1,297 @@
+{
+  "summary": {
+    "run_id": "n1-naive-baseline-2026-08-13",
+    "split": "n1",
+    "model": "gemini-3.5-flash-lite",
+    "n_graded": 57,
+    "hallucination_rate": 0.10526315789473684,
+    "n_hallucinated": 6
+  },
+  "results": [
+    {
+      "financebench_id": "financebench_id_04672",
+      "hallucinated": true,
+      "raw_text": "$8.7 billion"
+    },
+    {
+      "financebench_id": "financebench_id_01865",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_02987",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_07966",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04735",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_07507",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03856",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_01319",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_10420",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_06655",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_08135",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03882",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00684",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_01936",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03069",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00222",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00757",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_05718",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04254",
+      "hallucinated": true,
+      "raw_text": "$1,832 million"
+    },
+    {
+      "financebench_id": "financebench_id_02608",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04417",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03473",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_09724",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_06272",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_10130",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_05915",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04103",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03471",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_10136",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_01490",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_01491",
+      "hallucinated": true,
+      "raw_text": "$13.2 billion"
+    },
+    {
+      "financebench_id": "financebench_id_00299",
+      "hallucinated": true,
+      "raw_text": "$2,393 million"
+    },
+    {
+      "financebench_id": "financebench_id_00394",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_10499",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04412",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03031",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03718",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03849",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00407",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04700",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04458",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03282",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04302",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04080",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04980",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_03620",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04481",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00705",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00882",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_01476",
+      "hallucinated": true,
+      "raw_text": "1%"
+    },
+    {
+      "financebench_id": "financebench_id_00283",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00859",
+      "hallucinated": true,
+      "raw_text": "$13,077 million"
+    },
+    {
+      "financebench_id": "financebench_id_00216",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_00566",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_06247",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_04784",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    },
+    {
+      "financebench_id": "financebench_id_06741",
+      "hallucinated": false,
+      "raw_text": "NOT_FOUND"
+    }
+  ]
+}

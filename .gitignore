@@ -247,6 +247,12 @@ coverage/
 eval/pdfs/
 eval/data/raw/
 
+# Generation cache — local SQLite, reproducible by re-running against the API
+# (or replayed from whichever machine has it). Not source of truth for METRICS.md
+# numbers; the command + commit + run_id in METRICS.md is.
+eval/data/cache.sqlite3
+eval/data/cache.sqlite3-*
+
 #planning
 METRICS.md 
 PROJECT_PLAN.md 

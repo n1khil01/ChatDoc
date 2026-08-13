@@ -48,15 +48,21 @@ class Chunk:
         self.tokens = tokenize(text)
 
 
-def chunk_document(pdf_path: Path) -> list[Chunk]:
+def chunk_document(pdf_path: Path, excluded_pages: frozenset[int] = frozenset()) -> list[Chunk]:
     """Fixed 512-token chunks with 64-token overlap, naive — no table awareness, no
     section headers, page number carried only as "whichever page the chunk starts on".
     This crude page attribution is itself part of the baseline's weakness.
+
+    `excluded_pages` drops those pages' words before chunking (not after), so an
+    ablated page genuinely never appears in any chunk's text — used to build the N1
+    same-document evidence-ablation negatives in eval/runner.py.
     """
     doc = pymupdf.open(pdf_path)
     try:
         page_word_spans: list[tuple[int, list[str]]] = []
         for page_num in range(doc.page_count):
+            if page_num in excluded_pages:
+                continue
             words = doc.load_page(page_num).get_text().split()
             page_word_spans.append((page_num, words))
     finally:
