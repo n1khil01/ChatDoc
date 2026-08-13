@@ -1,0 +1,12 @@
+{
+  "source": "PatronusAI/financebench",
+  "source_commit_ref": "main",
+  "license": "CC-BY-NC-4.0",
+  "built_at": "2026-08-13T19:19:20.108271+00:00",
+  "questions_total": 150,
+  "numeric_gradable": 74,
+  "not_gradable": 76,
+  "answerable_jsonl_sha256": "04d31fecab7c506313489cdbd46773404eaa08b877f347fce1edeae7c198f7c1",
+  "questions_source_sha256": "a5a2aa673e573e55675fc3c0f9aa38c1cf59d2abc91edb077534f71f10a71877",
+  "doc_info_source_sha256": "1c69127783879de8cdadb159d2181f39bc3123b8e0ebf74031c3969d69189575"
+}

@@ -149,6 +149,7 @@ activemq-data/
 
 # Environments
 .env
+.env**
 .envrc
 .venv
 env/
@@ -216,3 +217,38 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#claude
+.claude
+
+# Node / TypeScript (frontend)
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+.turbo/
+*.tsbuildinfo
+coverage/
+.pnpm-store/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Model weights baked at build/download time
+.model_cache/
+*.onnx
+
+# FinanceBench source PDFs and raw source jsonl — large, reproducible via
+# eval/build_dataset.py. The frozen, content-hashed eval/data/*.jsonl outputs are
+# committed; the raw inputs that produced them are not.
+eval/pdfs/
+eval/data/raw/
+
+#planning
+METRICS.md 
+PROJECT_PLAN.md 
+
+

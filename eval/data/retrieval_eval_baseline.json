@@ -1,0 +1,608 @@
+{
+  "summary": {
+    "n_questions": 74,
+    "chunking": {
+      "size_tokens": 512,
+      "overlap_tokens": 64
+    },
+    "retriever": "naive dense-only baseline (TF-IDF cosine stand-in, no table awareness)",
+    "mrr": 0.07397274429742504,
+    "recall_at_1": 0.02702702702702703,
+    "recall_at_5": 0.13513513513513514,
+    "recall_at_10": 0.17567567567567569
+  },
+  "per_question": [
+    {
+      "financebench_id": "financebench_id_03029",
+      "rank_of_first_hit": 144,
+      "reciprocal_rank": 0.006944444444444444,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04672",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01865",
+      "rank_of_first_hit": 298,
+      "reciprocal_rank": 0.003355704697986577,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_02987",
+      "rank_of_first_hit": 209,
+      "reciprocal_rank": 0.004784688995215311,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_07966",
+      "rank_of_first_hit": 112,
+      "reciprocal_rank": 0.008928571428571428,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04735",
+      "rank_of_first_hit": 14,
+      "reciprocal_rank": 0.07142857142857142,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_07507",
+      "rank_of_first_hit": 125,
+      "reciprocal_rank": 0.008,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03856",
+      "rank_of_first_hit": 5,
+      "reciprocal_rank": 0.2,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_01319",
+      "rank_of_first_hit": 6,
+      "reciprocal_rank": 0.16666666666666666,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_10420",
+      "rank_of_first_hit": 60,
+      "reciprocal_rank": 0.016666666666666666,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_06655",
+      "rank_of_first_hit": 98,
+      "reciprocal_rank": 0.01020408163265306,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_08135",
+      "rank_of_first_hit": 93,
+      "reciprocal_rank": 0.010752688172043012,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_08286",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03882",
+      "rank_of_first_hit": 190,
+      "reciprocal_rank": 0.005263157894736842,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00684",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01936",
+      "rank_of_first_hit": 28,
+      "reciprocal_rank": 0.03571428571428571,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03069",
+      "rank_of_first_hit": 96,
+      "reciprocal_rank": 0.010416666666666666,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00222",
+      "rank_of_first_hit": 139,
+      "reciprocal_rank": 0.007194244604316547,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01198",
+      "rank_of_first_hit": 11,
+      "reciprocal_rank": 0.09090909090909091,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01279",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00757",
+      "rank_of_first_hit": 51,
+      "reciprocal_rank": 0.0196078431372549,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_05718",
+      "rank_of_first_hit": 162,
+      "reciprocal_rank": 0.006172839506172839,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04254",
+      "rank_of_first_hit": 6,
+      "reciprocal_rank": 0.16666666666666666,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_02608",
+      "rank_of_first_hit": 117,
+      "reciprocal_rank": 0.008547008547008548,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04417",
+      "rank_of_first_hit": 123,
+      "reciprocal_rank": 0.008130081300813009,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04660",
+      "rank_of_first_hit": 110,
+      "reciprocal_rank": 0.00909090909090909,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03838",
+      "rank_of_first_hit": 169,
+      "reciprocal_rank": 0.005917159763313609,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_07661",
+      "rank_of_first_hit": 9,
+      "reciprocal_rank": 0.1111111111111111,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_10285",
+      "rank_of_first_hit": 91,
+      "reciprocal_rank": 0.01098901098901099,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03473",
+      "rank_of_first_hit": 244,
+      "reciprocal_rank": 0.004098360655737705,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_09724",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_06272",
+      "rank_of_first_hit": 3,
+      "reciprocal_rank": 0.3333333333333333,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_10130",
+      "rank_of_first_hit": 132,
+      "reciprocal_rank": 0.007575757575757576,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_02981",
+      "rank_of_first_hit": 129,
+      "reciprocal_rank": 0.007751937984496124,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04209",
+      "rank_of_first_hit": 66,
+      "reciprocal_rank": 0.015151515151515152,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_05915",
+      "rank_of_first_hit": 481,
+      "reciprocal_rank": 0.002079002079002079,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04103",
+      "rank_of_first_hit": 150,
+      "reciprocal_rank": 0.006666666666666667,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03471",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04854",
+      "rank_of_first_hit": 40,
+      "reciprocal_rank": 0.025,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_10136",
+      "rank_of_first_hit": 102,
+      "reciprocal_rank": 0.00980392156862745,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01490",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01491",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00299",
+      "rank_of_first_hit": 15,
+      "reciprocal_rank": 0.06666666666666667,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_02119",
+      "rank_of_first_hit": 22,
+      "reciprocal_rank": 0.045454545454545456,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00394",
+      "rank_of_first_hit": 80,
+      "reciprocal_rank": 0.0125,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_10499",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04412",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03031",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03718",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04171",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03849",
+      "rank_of_first_hit": 119,
+      "reciprocal_rank": 0.008403361344537815,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00407",
+      "rank_of_first_hit": 4,
+      "reciprocal_rank": 0.25,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_04700",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04458",
+      "rank_of_first_hit": 71,
+      "reciprocal_rank": 0.014084507042253521,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03282",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04302",
+      "rank_of_first_hit": 123,
+      "reciprocal_rank": 0.008130081300813009,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03531",
+      "rank_of_first_hit": null,
+      "reciprocal_rank": 0.0,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04080",
+      "rank_of_first_hit": 128,
+      "reciprocal_rank": 0.0078125,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01163",
+      "rank_of_first_hit": 66,
+      "reciprocal_rank": 0.015151515151515152,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04980",
+      "rank_of_first_hit": 366,
+      "reciprocal_rank": 0.00273224043715847,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_01009",
+      "rank_of_first_hit": 373,
+      "reciprocal_rank": 0.002680965147453083,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_03620",
+      "rank_of_first_hit": 46,
+      "reciprocal_rank": 0.021739130434782608,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04481",
+      "rank_of_first_hit": 254,
+      "reciprocal_rank": 0.003937007874015748,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00705",
+      "rank_of_first_hit": 1,
+      "reciprocal_rank": 1.0,
+      "recall_at_1": true,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_00882",
+      "rank_of_first_hit": 1,
+      "reciprocal_rank": 1.0,
+      "recall_at_1": true,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_01474",
+      "rank_of_first_hit": 3,
+      "reciprocal_rank": 0.3333333333333333,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_01476",
+      "rank_of_first_hit": 4,
+      "reciprocal_rank": 0.25,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_00283",
+      "rank_of_first_hit": 20,
+      "reciprocal_rank": 0.05,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00859",
+      "rank_of_first_hit": 2,
+      "reciprocal_rank": 0.5,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_00216",
+      "rank_of_first_hit": 162,
+      "reciprocal_rank": 0.006172839506172839,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_00566",
+      "rank_of_first_hit": 5,
+      "reciprocal_rank": 0.2,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    },
+    {
+      "financebench_id": "financebench_id_06247",
+      "rank_of_first_hit": 326,
+      "reciprocal_rank": 0.003067484662576687,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_04784",
+      "rank_of_first_hit": 139,
+      "reciprocal_rank": 0.007194244604316547,
+      "recall_at_1": false,
+      "recall_at_5": false,
+      "recall_at_10": false
+    },
+    {
+      "financebench_id": "financebench_id_06741",
+      "rank_of_first_hit": 4,
+      "reciprocal_rank": 0.25,
+      "recall_at_1": false,
+      "recall_at_5": true,
+      "recall_at_10": true
+    }
+  ]
+}

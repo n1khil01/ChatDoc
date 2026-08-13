@@ -1,0 +1,15 @@
+{
+  "counts": {
+    "N1": 57,
+    "N2": 14,
+    "N0": 74,
+    "N3": 0
+  },
+  "dropped_gold_figure_leak": {
+    "N1": 17,
+    "N2": 5
+  },
+  "total": 145,
+  "negatives_jsonl_sha256": "8a4a7457174eef7c35115a129fe40191163b15c6daf867378d550c7b623f91b2",
+  "note": "N0 is a sanity floor, reported separately, never the headline metric."
+}
