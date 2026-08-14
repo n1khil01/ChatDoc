@@ -1,0 +1,21 @@
+# Examples (commented out, not loaded — lines starting with # are skipped by build_negatives.py).
+# Both against NIKE_2021_10K. Nike's actual reportable segments in this filing are geographic
+# (North America, EMEA, Greater China, APLA) plus Converse — no software or crypto line anywhere,
+# which is what makes these false premises checkable rather than guessed.
+# {"tier": "N3", "financebench_id": "n3_example_a", "question": "What was the impairment charge related to the company's cryptocurrency holdings in fiscal 2021?", "served_doc_name": "NIKE_2021_10K", "expected": "unanswerable", "note": "false premise — Nike holds no cryptocurrency assets and reports no such impairment; the 10-K has no crypto-related line item at all"}
+# {"tier": "N3", "financebench_id": "n3_example_b", "question": "How much revenue did Nike's Software segment generate in fiscal 2021?", "served_doc_name": "NIKE_2021_10K", "expected": "unanswerable", "note": "false premise — Nike's FY2021 10-K reports four geographic segments plus Converse; there is no Software segment to report revenue for"}
+{"tier": "N3", "financebench_id": "n3_0001", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0002", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0003", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0004", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0005", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0006", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0007", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0008", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0009", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0010", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0011", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0012", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0013", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0014", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}
+{"tier": "N3", "financebench_id": "n3_0015", "question": "", "served_doc_name": "", "expected": "unanswerable", "note": ""}

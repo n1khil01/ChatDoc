@@ -42,7 +42,11 @@ SEED = 1337
 
 def load_jsonl(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return [
+            json.loads(line)
+            for line in f
+            if line.strip() and not line.lstrip().startswith("#")
+        ]
 
 
 MIN_SIGNIFICANT_DIGITS = 3  # below this, a bare number is too generic (years, page refs, etc.)

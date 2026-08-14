@@ -4,6 +4,8 @@ Usage:
     uv run python main.py build-dataset [--skip-pdfs]
     uv run python main.py build-negatives
     uv run python main.py retrieval-eval
+    uv run python main.py retrieval-eval-v2
+    uv run python main.py compare-retrieval
     uv run python main.py run --split answerable --daily-budget 200 [--dry-run]
 """
 
@@ -30,6 +32,14 @@ def main() -> None:
         run()
     elif command == "retrieval-eval":
         from eval.run_retrieval_eval import main as run
+
+        run()
+    elif command == "retrieval-eval-v2":
+        from eval.run_retrieval_eval_v2 import main as run
+
+        run()
+    elif command == "compare-retrieval":
+        from eval.compare_retrieval import main as run
 
         run()
     elif command == "run":
