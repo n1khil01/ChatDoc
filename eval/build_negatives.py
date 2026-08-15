@@ -200,7 +200,22 @@ def main() -> None:
         raise SystemExit(1)
 
     records = load_jsonl(ANSWERABLE_PATH)
-    doc_info = {d["doc_name"]: d for d in load_jsonl(DOC_INFO_PATH)}
+    all_doc_info = {d["doc_name"]: d for d in load_jsonl(DOC_INFO_PATH)}
+
+    # financebench_document_information.jsonl lists ~361 documents spanning FinanceBench's
+    # full (open + closed-eval) corpus, but the repo's /pdfs/ only mirrors PDFs for the 150
+    # open-source questions' documents -- the rest are metadata-only entries whose doc_link
+    # points at the filer's own site, not something build_dataset.py downloads. N0 (wrong
+    # company) and N2 (temporal mismatch) must only serve documents this project actually
+    # has a PDF for, or ingestion 404s/FileNotFoundErrors the first time that tier is run.
+    downloaded = {p.stem for p in PDF_DIR.glob("*.pdf")}
+    doc_info = {name: info for name, info in all_doc_info.items() if name in downloaded}
+    dropped_no_pdf = len(all_doc_info) - len(doc_info)
+    print(
+        f"{len(doc_info)}/{len(all_doc_info)} documents have a local PDF "
+        f"({dropped_no_pdf} metadata-only entries excluded from N0/N2 candidate pools)",
+        file=sys.stderr,
+    )
 
     have_pdfs = sum(1 for r in records if (PDF_DIR / f"{r['doc_name']}.pdf").exists())
     print(f"{have_pdfs}/{len(records)} source PDFs present in {PDF_DIR}", file=sys.stderr)

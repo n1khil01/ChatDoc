@@ -32,6 +32,21 @@ class NormalizedNumber:
     is_percent: bool
 
 
+def scale_multiplier(scale: str | None) -> float:
+    """Map a unit_scale string ('thousands' | 'millions' | 'billions' | None, as stored on
+    `chunks.unit_scale` by ingest/chunker.py, or a free-text scale word) to its multiplier.
+    Shared by dataset classification, grading, and eval/gate.py's numeric provenance check,
+    so a scale word is interpreted identically everywhere it appears.
+    """
+    if not scale:
+        return 1.0
+    lowered = scale.strip().lower()
+    for word, mult in _SCALE_WORDS.items():
+        if word == lowered or re.search(rf"\b{word}\b", lowered):
+            return mult
+    return 1.0
+
+
 def normalize_numeric_answer(text: str) -> NormalizedNumber | None:
     """Parse a free-text financial answer into a single float, or None if not gradable.
 

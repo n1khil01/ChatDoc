@@ -7,6 +7,8 @@ Usage:
     uv run python main.py retrieval-eval-v2
     uv run python main.py compare-retrieval
     uv run python main.py run --split answerable --daily-budget 200 [--dry-run]
+    uv run python main.py run-v2 --split answerable --daily-budget 200 [--dry-run]
+    uv run python main.py ablation --run-id <id> [--neg-splits n0 n1 n2 n3]
 """
 
 from __future__ import annotations
@@ -44,6 +46,14 @@ def main() -> None:
         run()
     elif command == "run":
         from eval.runner import main as run
+
+        run()
+    elif command == "run-v2":
+        from eval.runner_v2 import main as run
+
+        run()
+    elif command == "ablation":
+        from eval.ablation import main as run
 
         run()
     else:

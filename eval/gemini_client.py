@@ -6,12 +6,14 @@ default retry policy."
 
 from __future__ import annotations
 
+import json
 import os
 import time
 
 from google import genai
-from google.genai import errors
+from google.genai import errors, types
 
+from eval.gate_schema import GateAnswer
 from eval.quota_guard import RateLimited
 
 # gemini-2.5-flash returns 404 "no longer available to new users" for freshly issued
@@ -67,6 +69,48 @@ def generate(client: genai.Client, model: str, prompt: str) -> dict:
     usage = response.usage_metadata
     return {
         "text": response.text or "",
+        "prompt_tokens": getattr(usage, "prompt_token_count", None),
+        "completion_tokens": getattr(usage, "candidates_token_count", None),
+        "latency_ms": latency_ms,
+    }
+
+
+def generate_structured(client: genai.Client, model: str, prompt: str) -> dict:
+    """Like `generate`, but constrains the response to eval.gate_schema.GateAnswer's JSON
+    schema (PROJECT_PLAN.md §7 Phase 2 step 1). Returns a plain JSON-serializable dict with
+    the parsed answer under "parsed" (never a Pydantic instance, so it survives the sqlite
+    json.dumps round-trip in eval/cache.py unchanged).
+    """
+    t0 = time.monotonic()
+    try:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=GateAnswer,
+            ),
+        )
+    except errors.ClientError as e:
+        if e.code == 429:
+            raise RateLimited(_retry_after_from(e)) from e
+        raise
+    except errors.ServerError as e:
+        raise RateLimited(_retry_after_from(e) or 5.0) from e
+    latency_ms = (time.monotonic() - t0) * 1000
+
+    parsed = getattr(response, "parsed", None)
+    if parsed is not None:
+        parsed_dict = parsed.model_dump() if hasattr(parsed, "model_dump") else dict(parsed)
+    else:
+        # Schema-constrained generation should always populate .parsed; fall back to
+        # re-parsing raw text (validated against the schema) if the SDK ever doesn't.
+        parsed_dict = GateAnswer.model_validate(json.loads(response.text)).model_dump()
+
+    usage = response.usage_metadata
+    return {
+        "text": response.text or "",
+        "parsed": parsed_dict,
         "prompt_tokens": getattr(usage, "prompt_token_count", None),
         "completion_tokens": getattr(usage, "candidates_token_count", None),
         "latency_ms": latency_ms,

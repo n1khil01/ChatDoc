@@ -18,8 +18,17 @@ from ingest.embeddings import embed_texts
 EMBED_BATCH = 32
 
 
-def ingest_pdf(conn, pdf_path: Path, excluded_pages: frozenset[int] = frozenset()) -> int:
-    doc_name = pdf_path.stem
+def ingest_pdf(
+    conn,
+    pdf_path: Path,
+    excluded_pages: frozenset[int] = frozenset(),
+    doc_key: str | None = None,
+) -> int:
+    """doc_key overrides the `documents.doc_name` used for upsert/dedup -- needed when the
+    same PDF is ingested more than once under different page exclusions (e.g. eval's N1
+    evidence-ablation negative), since upsert_document + delete_chunks_for_document key on
+    doc_name and would otherwise overwrite the full document's chunks."""
+    doc_name = doc_key or pdf_path.stem
     page_count = pymupdf.open(pdf_path).page_count
 
     document_id = upsert_document(conn, doc_name, str(pdf_path), page_count)

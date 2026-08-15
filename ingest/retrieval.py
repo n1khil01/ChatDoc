@@ -24,13 +24,14 @@ class RetrievedChunk:
     page_num: int
     chunk_type: str
     text: str
+    unit_scale: str | None = None
 
 
 def dense_search(conn, document_id: int, query: str, top_n: int) -> list[RetrievedChunk]:
     qvec = HalfVector(embed_query(query))
     rows = conn.execute(
         """
-        SELECT id, document_id, page_num, chunk_type, text
+        SELECT id, document_id, page_num, chunk_type, text, unit_scale
         FROM chunks
         WHERE document_id = %s
         ORDER BY embedding <=> %s
@@ -44,7 +45,7 @@ def dense_search(conn, document_id: int, query: str, top_n: int) -> list[Retriev
 def sparse_search(conn, document_id: int, query: str, top_n: int) -> list[RetrievedChunk]:
     rows = conn.execute(
         """
-        SELECT id, document_id, page_num, chunk_type, text
+        SELECT id, document_id, page_num, chunk_type, text, unit_scale
         FROM chunks
         WHERE document_id = %s AND tsv @@ plainto_tsquery('english', %s)
         ORDER BY ts_rank(tsv, plainto_tsquery('english', %s)) DESC
@@ -68,7 +69,7 @@ def rrf_fuse(
     return [(chunks_by_id[cid], score) for cid, score in fused]
 
 
-def hybrid_retrieve(
+def hybrid_retrieve_scored(
     conn,
     document_id: int,
     query: str,
@@ -76,9 +77,13 @@ def hybrid_retrieve(
     sparse_n: int = 30,
     rrf_top_n: int = 20,
     rerank_top_k: int = 10,
-) -> list[RetrievedChunk]:
+) -> list[tuple[RetrievedChunk, float]]:
     """Dense + sparse search -> RRF fusion -> cross-encoder rerank of the fused top-N,
-    returning the top rerank_top_k chunks."""
+    returning the top rerank_top_k (chunk, cross-encoder score) pairs, highest score first.
+
+    The scores are needed by eval/gate.py's L1 margin experiment (top1 - top2 rerank score),
+    which is why this is the primitive and hybrid_retrieve() below is the thin wrapper.
+    """
     dense = dense_search(conn, document_id, query, dense_n)
     sparse = sparse_search(conn, document_id, query, sparse_n)
     fused = rrf_fuse([dense, sparse])[:rrf_top_n]
@@ -88,4 +93,20 @@ def hybrid_retrieve(
     candidates = [c for c, _ in fused]
     scores = rerank_fn(query, [c.text for c in candidates])
     reranked = sorted(zip(candidates, scores), key=lambda t: -t[1])
-    return [c for c, _ in reranked[:rerank_top_k]]
+    return reranked[:rerank_top_k]
+
+
+def hybrid_retrieve(
+    conn,
+    document_id: int,
+    query: str,
+    dense_n: int = 30,
+    sparse_n: int = 30,
+    rrf_top_n: int = 20,
+    rerank_top_k: int = 10,
+) -> list[RetrievedChunk]:
+    """Same as hybrid_retrieve_scored, but returns just the chunks (no scores)."""
+    scored = hybrid_retrieve_scored(
+        conn, document_id, query, dense_n, sparse_n, rrf_top_n, rerank_top_k
+    )
+    return [c for c, _ in scored]
