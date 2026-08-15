@@ -3,13 +3,13 @@
     "N1": 57,
     "N2": 58,
     "N0": 74,
-    "N3": 15
+    "N3": 30
   },
   "dropped_gold_figure_leak": {
     "N1": 17,
     "N2": 10
   },
-  "total": 204,
-  "negatives_jsonl_sha256": "45590a96ff7bbfada599d1b45c6075861e10454f98e146d3360f8acd65514367",
+  "total": 219,
+  "negatives_jsonl_sha256": "d35065ccf43b9a92fd984f71259a49779c2caf026c3b6bf65da9a2ab616e0682",
   "note": "N0 is a sanity floor, reported separately, never the headline metric."
 }

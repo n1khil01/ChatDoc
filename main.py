@@ -9,6 +9,7 @@ Usage:
     uv run python main.py run --split answerable --daily-budget 200 [--dry-run]
     uv run python main.py run-v2 --split answerable --daily-budget 200 [--dry-run]
     uv run python main.py ablation --run-id <id> [--neg-splits n0 n1 n2 n3]
+    uv run python main.py plot-risk-coverage --label <id> [--neg-splits n0 n1 n2 n3]
 """
 
 from __future__ import annotations
@@ -54,6 +55,10 @@ def main() -> None:
         run()
     elif command == "ablation":
         from eval.ablation import main as run
+
+        run()
+    elif command == "plot-risk-coverage":
+        from eval.plot_risk_coverage import main as run
 
         run()
     else:

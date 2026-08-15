@@ -1,0 +1,114 @@
+{
+  "none": {
+    "answerable": {
+      "n": 74,
+      "coverage": 0.3783783783783784,
+      "accuracy_on_answered": 0.42857142857142855,
+      "accuracy_overall": 0.16216216216216217
+    },
+    "n0": {
+      "n": 74,
+      "hallucination_rate": 0.013513513513513514,
+      "n_hallucinated": 1
+    },
+    "n1": {
+      "n": 57,
+      "hallucination_rate": 0.17543859649122806,
+      "n_hallucinated": 10
+    },
+    "n2": {
+      "n": 58,
+      "hallucination_rate": 0.08620689655172414,
+      "n_hallucinated": 5
+    },
+    "n3": {
+      "n": 30,
+      "hallucination_rate": 0.0,
+      "n_hallucinated": 0
+    }
+  },
+  "L2": {
+    "answerable": {
+      "n": 74,
+      "coverage": 0.3783783783783784,
+      "accuracy_on_answered": 0.42857142857142855,
+      "accuracy_overall": 0.16216216216216217
+    },
+    "n0": {
+      "n": 74,
+      "hallucination_rate": 0.013513513513513514,
+      "n_hallucinated": 1
+    },
+    "n1": {
+      "n": 57,
+      "hallucination_rate": 0.17543859649122806,
+      "n_hallucinated": 10
+    },
+    "n2": {
+      "n": 58,
+      "hallucination_rate": 0.08620689655172414,
+      "n_hallucinated": 5
+    },
+    "n3": {
+      "n": 30,
+      "hallucination_rate": 0.0,
+      "n_hallucinated": 0
+    }
+  },
+  "L2+L3": {
+    "answerable": {
+      "n": 74,
+      "coverage": 0.21621621621621623,
+      "accuracy_on_answered": 0.4375,
+      "accuracy_overall": 0.0945945945945946
+    },
+    "n0": {
+      "n": 74,
+      "hallucination_rate": 0.0,
+      "n_hallucinated": 0
+    },
+    "n1": {
+      "n": 57,
+      "hallucination_rate": 0.08771929824561403,
+      "n_hallucinated": 5
+    },
+    "n2": {
+      "n": 58,
+      "hallucination_rate": 0.034482758620689655,
+      "n_hallucinated": 2
+    },
+    "n3": {
+      "n": 30,
+      "hallucination_rate": 0.0,
+      "n_hallucinated": 0
+    }
+  },
+  "L1+L2+L3": {
+    "answerable": {
+      "n": 74,
+      "coverage": 0.21621621621621623,
+      "accuracy_on_answered": 0.4375,
+      "accuracy_overall": 0.0945945945945946
+    },
+    "n0": {
+      "n": 74,
+      "hallucination_rate": 0.0,
+      "n_hallucinated": 0
+    },
+    "n1": {
+      "n": 57,
+      "hallucination_rate": 0.08771929824561403,
+      "n_hallucinated": 5
+    },
+    "n2": {
+      "n": 58,
+      "hallucination_rate": 0.034482758620689655,
+      "n_hallucinated": 2
+    },
+    "n3": {
+      "n": 30,
+      "hallucination_rate": 0.0,
+      "n_hallucinated": 0
+    }
+  }
+}
