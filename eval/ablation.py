@@ -63,12 +63,21 @@ def decide(
 
 
 def grade_one(record: dict, raw: dict, gate: GateResult, is_gold: bool) -> dict:
-    answered = gate.passed and GateAnswer.model_validate(raw["parsed"]).sufficient
+    """`gate.passed` already encodes whichever layers were active for this config --
+    check_l2 is what checks `sufficient`, and it only runs when "L2" is in the config's
+    layer set (see eval.gate.apply_gate). The "none" config has no layers at all, so
+    `gate.passed` is trivially True and "answered" must fall back to a raw content check
+    (did the model populate a value/answer_text at all) -- never re-checking `sufficient`
+    here, or "none" silently inherits L2's mechanism and the ablation can't show what L2
+    actually adds.
+    """
+    parsed = GateAnswer.model_validate(raw["parsed"])
+    has_content = parsed.value is not None or bool(parsed.answer_text)
+    answered = gate.passed and has_content
     row = {"financebench_id": record["financebench_id"], "answered": answered, "refusal_reason": gate.reason}
     if is_gold:
         correct = False
         if answered:
-            parsed = GateAnswer.model_validate(raw["parsed"])
             if parsed.value is not None:
                 correct = numbers_match(record["gold_value"], parsed.value)
         row["correct"] = correct
@@ -95,10 +104,15 @@ def summarize_config(rows: list[dict], is_gold: bool) -> dict:
 
 
 def run_ablation_table(
-    cache: GenerationCache, run_id: str, gold_records: list[dict], neg_records: dict[str, list[dict]]
+    cache: GenerationCache,
+    run_ids: dict[str, str],
+    gold_records: list[dict],
+    neg_records: dict[str, list[dict]],
 ) -> dict:
-    gold_cached = load_cached(cache, run_id, gold_records)
-    neg_cached = {tier: load_cached(cache, run_id, recs) for tier, recs in neg_records.items()}
+    gold_cached = load_cached(cache, run_ids["answerable"], gold_records)
+    neg_cached = {
+        tier: load_cached(cache, run_ids[tier], recs) for tier, recs in neg_records.items()
+    }
 
     table: dict[str, dict] = {}
     for config_name, layers in CONFIGS.items():
@@ -118,15 +132,28 @@ def run_ablation_table(
 
 
 def risk_coverage_sweep(
-    cache: GenerationCache, run_id: str, gold_records: list[dict], neg_records: dict[str, list[dict]]
+    cache: GenerationCache,
+    run_ids: dict[str, str],
+    gold_records: list[dict],
+    neg_records: dict[str, list[dict]],
 ) -> dict:
-    """Sweep the L1 margin threshold with L2+L3 fixed on, per tier, and compute (risk,
-    coverage) points + AURC via trapezoidal integration over coverage-sorted points.
-    Risk = fraction of *answered* items that are wrong (negatives: always wrong if
-    answered; answerable: numeric mismatch).
+    """Sweep the L1 margin threshold with L2+L3 fixed on, per tier, and compute per-threshold
+    points + an AUC summary via trapezoidal integration over coverage-sorted points.
+
+    For the answerable split, this is a real risk-coverage curve: `risk` = fraction of
+    *answered* items that are numerically wrong, and `aurc` summarizes it.
+
+    For negative tiers, "risk among answered" is degenerate -- any answer on a negative is
+    wrong by definition, so it is pinned at 1.0 wherever coverage > 0 and conveys nothing.
+    The informative quantity there is `hallucination_rate` (= coverage at that threshold,
+    i.e. how often the gate let a negative through), summarized as `hallucination_rate_auc`
+    -- deliberately NOT called "risk"/"aurc" so it can't be misread as the same statistic
+    the answerable split reports.
     """
-    gold_cached = load_cached(cache, run_id, gold_records)
-    neg_cached = {tier: load_cached(cache, run_id, recs) for tier, recs in neg_records.items()}
+    gold_cached = load_cached(cache, run_ids["answerable"], gold_records)
+    neg_cached = {
+        tier: load_cached(cache, run_ids[tier], recs) for tier, recs in neg_records.items()
+    }
 
     margins = sorted(
         {
@@ -137,56 +164,100 @@ def risk_coverage_sweep(
     )
     thresholds = [margins[0] - 1e-6] + margins if margins else [0.0]
 
-    def points_for(cached: list[tuple[dict, dict]], is_gold: bool) -> list[dict]:
+    def points_for_gold(cached: list[tuple[dict, dict]]) -> list[dict]:
         pts = []
         for t in thresholds:
             rows = [
-                grade_one(r, raw, decide(raw, CONFIGS["L1+L2+L3"], DEFAULT_L3B_THRESHOLD, l1_threshold=t), is_gold)
+                grade_one(r, raw, decide(raw, CONFIGS["L1+L2+L3"], DEFAULT_L3B_THRESHOLD, l1_threshold=t), True)
                 for r, raw in cached
             ]
             n = len(rows)
             answered = [r for r in rows if r["answered"]]
             coverage = len(answered) / n if n else 0.0
-            if is_gold:
-                wrong = sum(1 for r in answered if not r["correct"])
-            else:
-                wrong = len(answered)  # every answered negative is wrong
+            wrong = sum(1 for r in answered if not r["correct"])
             risk = wrong / len(answered) if answered else 0.0
             pts.append({"threshold": t, "coverage": coverage, "risk": risk})
         return pts
 
-    def aurc(points: list[dict]) -> float:
-        pts = sorted(points, key=lambda p: p["coverage"])
+    def points_for_negative(cached: list[tuple[dict, dict]]) -> list[dict]:
+        pts = []
+        for t in thresholds:
+            rows = [
+                grade_one(r, raw, decide(raw, CONFIGS["L1+L2+L3"], DEFAULT_L3B_THRESHOLD, l1_threshold=t), False)
+                for r, raw in cached
+            ]
+            n = len(rows)
+            hallucination_rate = sum(1 for r in rows if r["answered"]) / n if n else 0.0
+            pts.append({"threshold": t, "hallucination_rate": hallucination_rate})
+        return pts
+
+    def area_under(points: list[dict], x_key: str, y_key: str) -> float:
+        pts = sorted(points, key=lambda p: p[x_key])
         area = 0.0
         for a, b in zip(pts, pts[1:]):
-            dx = b["coverage"] - a["coverage"]
-            area += dx * (a["risk"] + b["risk"]) / 2
+            dx = b[x_key] - a[x_key]
+            area += dx * (a[y_key] + b[y_key]) / 2
         return area
 
-    result: dict[str, dict] = {"answerable": {"points": points_for(gold_cached, True)}}
-    result["answerable"]["aurc"] = aurc(result["answerable"]["points"])
+    gold_points = points_for_gold(gold_cached)
+    result: dict[str, dict] = {
+        "answerable": {"points": gold_points, "aurc": area_under(gold_points, "coverage", "risk")}
+    }
     for tier, cached in neg_cached.items():
-        pts = points_for(cached, False)
-        result[tier] = {"points": pts, "aurc": aurc(pts)}
+        pts = points_for_negative(cached)
+        result[tier] = {
+            "points": pts,
+            # integrated over `threshold` (not `coverage`, which doesn't exist per-point
+            # here) -- summarizes how much the L1 sweep range was spent letting this
+            # negative tier through.
+            "hallucination_rate_auc": area_under(pts, "threshold", "hallucination_rate"),
+        }
     return result
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-id", required=True)
+    parser.add_argument(
+        "--run-id",
+        help="single run_id shared by every split (use this if you passed --run-id "
+        "explicitly to every run-v2 invocation)",
+    )
+    parser.add_argument(
+        "--run-ids",
+        nargs="*",
+        default=[],
+        metavar="SPLIT=RUN_ID",
+        help="per-split run_id overrides, e.g. n2=n2-gate-2026-08-15 -- needed because "
+        "run-v2's default run_id embeds the date it was invoked on, so splits run on "
+        "different days end up under different ids even in the 'same' eval pass",
+    )
     parser.add_argument("--neg-splits", nargs="*", default=["n0", "n1", "n2", "n3"])
+    parser.add_argument("--label", default=None, help="output filename suffix; defaults to --run-id")
     args = parser.parse_args()
+
+    splits = ["answerable", *args.neg_splits]
+    overrides = dict(pair.split("=", 1) for pair in args.run_ids)
+    run_ids: dict[str, str] = {}
+    for split in splits:
+        if split in overrides:
+            run_ids[split] = overrides[split]
+        elif args.run_id:
+            run_ids[split] = args.run_id
+        else:
+            print(f"no run_id for split {split!r} -- pass --run-id or --run-ids {split}=...", file=sys.stderr)
+            raise SystemExit(1)
 
     cache = GenerationCache()
     gold_records = load_split("answerable")
     neg_records = {tier: load_split(tier) for tier in args.neg_splits}
 
-    table = run_ablation_table(cache, args.run_id, gold_records, neg_records)
-    sweep = risk_coverage_sweep(cache, args.run_id, gold_records, neg_records)
+    table = run_ablation_table(cache, run_ids, gold_records, neg_records)
+    sweep = risk_coverage_sweep(cache, run_ids, gold_records, neg_records)
 
+    label = args.label or args.run_id or "-".join(sorted(set(run_ids.values())))
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    table_path = DATA_DIR / f"ablation_{args.run_id}.json"
-    sweep_path = DATA_DIR / f"risk_coverage_{args.run_id}.json"
+    table_path = DATA_DIR / f"ablation_{label}.json"
+    sweep_path = DATA_DIR / f"risk_coverage_{label}.json"
     table_path.write_text(json.dumps(table, indent=2), encoding="utf-8")
     sweep_path.write_text(json.dumps(sweep, indent=2), encoding="utf-8")
 
