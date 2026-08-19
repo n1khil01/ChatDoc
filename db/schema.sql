@@ -16,13 +16,55 @@
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
+-- Phase 3: auth. Argon2 password hashes, HttpOnly cookie sessions with sliding expiry
+-- (see PROJECT_PLAN.md §7 Phase 3). user_id scoping on documents/chunks is what the
+-- cross-user isolation test asserts against.
+CREATE TABLE IF NOT EXISTS users (
+    id            SERIAL PRIMARY KEY,
+    email         TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id         TEXT PRIMARY KEY,           -- random token, stored as the cookie value
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+
 CREATE TABLE IF NOT EXISTS documents (
     id          SERIAL PRIMARY KEY,
+    user_id     INTEGER REFERENCES users(id) ON DELETE CASCADE,
     doc_name    TEXT NOT NULL UNIQUE,      -- e.g. "3M_2018_10K" (matches FinanceBench doc_name)
+    display_name TEXT,                     -- original uploaded filename, shown in the client
     source_path TEXT NOT NULL,
     page_count  INTEGER NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'ready' CHECK (status IN ('processing', 'ready', 'failed')),
+    error       TEXT,
+
+    -- Live ingest progress, polled by the client so a processing upload can show which
+    -- stage it is in rather than an opaque "processing" badge. `stage` tracks the
+    -- pipeline step (ingest/pipeline.py emits these); stage_current/stage_total are the
+    -- unit counts for that step (pages for chunking, chunks for embedding).
+    stage         TEXT CHECK (stage IN ('queued', 'reading', 'chunking', 'embedding', 'indexing', 'done')),
+    stage_current INTEGER NOT NULL DEFAULT 0,
+    stage_total   INTEGER NOT NULL DEFAULT 0,
+    chunk_count   INTEGER NOT NULL DEFAULT 0,
+
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
+
+-- Migrations for databases created before the progress columns existed. Kept here (rather
+-- than a separate migration tool) to match how this schema is applied: re-run end to end.
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS stage TEXT;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS stage_current INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS stage_total INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS chunk_count INTEGER NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS chunks (
     id          BIGSERIAL PRIMARY KEY,
@@ -60,3 +102,27 @@ CREATE INDEX IF NOT EXISTS idx_chunks_tsv ON chunks USING GIN (tsv);
 -- rebuilt per-ingest -- see PROJECT_PLAN.md §7 Phase 1 note on maintenance_work_mem / CU budget.
 CREATE INDEX IF NOT EXISTS idx_chunks_embedding_hnsw
     ON chunks USING hnsw (embedding halfvec_cosine_ops);
+
+-- Phase 4: crash-safe ingest queue (PROJECT_PLAN.md §7 Phase 4, §5 note on SKIP LOCKED).
+-- A single worker process claims rows with `FOR UPDATE SKIP LOCKED` filtered to
+-- (status = 'queued') OR (status = 'processing' AND visible_at < now()) -- the second arm
+-- is what reclaims a job whose worker was killed mid-ingest (Render spin-down) without a
+-- second worker ever contending for it. `attempts` + `max_attempts` bound retries so a
+-- poison-pill PDF dead-letters instead of looping forever.
+CREATE TABLE IF NOT EXISTS jobs (
+    id           BIGSERIAL PRIMARY KEY,
+    document_id  INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    doc_key      TEXT NOT NULL,
+    pdf_path     TEXT NOT NULL,
+    status       TEXT NOT NULL DEFAULT 'queued'
+                 CHECK (status IN ('queued', 'processing', 'done', 'failed')),
+    attempts     INTEGER NOT NULL DEFAULT 0,
+    max_attempts INTEGER NOT NULL DEFAULT 3,
+    visible_at   TIMESTAMPTZ NOT NULL DEFAULT now(),  -- claim becomes reclaimable after this
+    last_error   TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_jobs_claimable ON jobs(status, visible_at);
+CREATE INDEX IF NOT EXISTS idx_jobs_document_id ON jobs(document_id);

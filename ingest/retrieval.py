@@ -25,13 +25,22 @@ class RetrievedChunk:
     chunk_type: str
     text: str
     unit_scale: str | None = None
+    bbox_x0: float | None = None
+    bbox_y0: float | None = None
+    bbox_x1: float | None = None
+    bbox_y1: float | None = None
+
+
+_CHUNK_COLUMNS = (
+    "id, document_id, page_num, chunk_type, text, unit_scale, bbox_x0, bbox_y0, bbox_x1, bbox_y1"
+)
 
 
 def dense_search(conn, document_id: int, query: str, top_n: int) -> list[RetrievedChunk]:
     qvec = HalfVector(embed_query(query))
     rows = conn.execute(
-        """
-        SELECT id, document_id, page_num, chunk_type, text, unit_scale
+        f"""
+        SELECT {_CHUNK_COLUMNS}
         FROM chunks
         WHERE document_id = %s
         ORDER BY embedding <=> %s
@@ -44,8 +53,8 @@ def dense_search(conn, document_id: int, query: str, top_n: int) -> list[Retriev
 
 def sparse_search(conn, document_id: int, query: str, top_n: int) -> list[RetrievedChunk]:
     rows = conn.execute(
-        """
-        SELECT id, document_id, page_num, chunk_type, text, unit_scale
+        f"""
+        SELECT {_CHUNK_COLUMNS}
         FROM chunks
         WHERE document_id = %s AND tsv @@ plainto_tsquery('english', %s)
         ORDER BY ts_rank(tsv, plainto_tsquery('english', %s)) DESC

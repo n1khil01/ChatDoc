@@ -149,6 +149,7 @@ activemq-data/
 
 # Environments
 .env
+.env*
 .env**
 .envrc
 .venv
@@ -253,8 +254,17 @@ eval/data/raw/
 eval/data/cache.sqlite3
 eval/data/cache.sqlite3-*
 
+# eval/data/ci_cache.sqlite3 is NOT ignored: it's a small, committed snapshot of
+# eval_generations rows that scripts/check_eval_regression.py replays in CI on every push,
+# with zero API calls possible (see PROJECT_PLAN.md §7 Phase 4).
+
+# Uploaded PDFs (local dev / manual testing) -- never source-controlled.
+/data/uploads/
+
 #planning
 METRICS.md 
 PROJECT_PLAN.md 
+
+.vscode
 
 

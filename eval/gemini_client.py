@@ -75,6 +75,46 @@ def generate(client: genai.Client, model: str, prompt: str) -> dict:
     }
 
 
+def stream_structured(client: genai.Client, model: str, prompt: str, stop_event=None):
+    """Streaming counterpart to generate_structured, for the live /query SSE endpoint
+    (PROJECT_PLAN.md §7 Phase 3). Yields raw text deltas as they arrive; the caller
+    accumulates them and parses the final JSON against GateAnswer once the stream ends.
+
+    `stop_event` (threading.Event), if given, is checked between chunks so a disconnected
+    client can tear down the underlying streaming HTTP call by breaking iteration early,
+    rather than only stopping the queue consumer while the upstream call runs to completion.
+    """
+    try:
+        stream = client.models.generate_content_stream(
+            model=model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=GateAnswer,
+            ),
+        )
+    except errors.ClientError as e:
+        if e.code == 429:
+            raise RateLimited(_retry_after_from(e)) from e
+        raise
+    except errors.ServerError as e:
+        raise RateLimited(_retry_after_from(e) or 5.0) from e
+
+    try:
+        for chunk in stream:
+            if stop_event is not None and stop_event.is_set():
+                return
+            if chunk.text:
+                yield chunk.text
+    finally:
+        # Iterator[GenerateContentResponse] is generator-backed; .close() (if present)
+        # tears down the underlying HTTP stream instead of leaving it to run to
+        # completion server-side after we stop reading it.
+        close = getattr(stream, "close", None)
+        if close is not None:
+            close()
+
+
 def generate_structured(client: genai.Client, model: str, prompt: str) -> dict:
     """Like `generate`, but constrains the response to eval.gate_schema.GateAnswer's JSON
     schema (PROJECT_PLAN.md §7 Phase 2 step 1). Returns a plain JSON-serializable dict with

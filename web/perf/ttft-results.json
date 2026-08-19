@@ -1,0 +1,48 @@
+{
+  "documentId": 202,
+  "nRuns": 8,
+  "ttftP95Ms": 4763.799999999814,
+  "fullResponseP95Ms": 4921.799999999814,
+  "runs": [
+    {
+      "ttftMs": 4763.799999999814,
+      "fullMs": 4921.799999999814,
+      "outcome": "refusal"
+    },
+    {
+      "ttftMs": 3661.5,
+      "fullMs": 3899.2999999998137,
+      "outcome": "refusal"
+    },
+    {
+      "ttftMs": 1870.1000000000931,
+      "fullMs": 1894.3000000002794,
+      "outcome": "refusal"
+    },
+    {
+      "ttftMs": 3823.2999999998137,
+      "fullMs": 3980.100000000093,
+      "outcome": "refusal"
+    },
+    {
+      "ttftMs": 3682.7000000001863,
+      "fullMs": 4037.3000000002794,
+      "outcome": "answer"
+    },
+    {
+      "ttftMs": 1681.9000000003725,
+      "fullMs": 1866.2000000001863,
+      "outcome": "answer"
+    },
+    {
+      "ttftMs": 3343,
+      "fullMs": 4272.800000000279,
+      "outcome": "answer"
+    },
+    {
+      "ttftMs": 1341.2999999998137,
+      "fullMs": 1483.5,
+      "outcome": "refusal"
+    }
+  ]
+}

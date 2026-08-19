@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-eval-gate:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: chatdoc
+          POSTGRES_PASSWORD: chatdoc
+          POSTGRES_DB: chatdoc
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chatdoc -d chatdoc"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://chatdoc:chatdoc@localhost:5432/chatdoc
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Apply schema
+        run: uv run python scripts/apply_schema.py
+
+      - name: Run tests
+        run: uv run pytest tests/ -q
+
+      # Zero API calls: replays a committed snapshot of cached generations
+      # (eval/data/ci_cache.sqlite3) against the grounding gate's grading logic and fails the
+      # build on a quality regression beyond tolerance. See PROJECT_PLAN.md §7 Phase 4 /
+      # §8 "0 calls in CI, ever" and scripts/check_eval_regression.py for what this checks.
+      - name: Eval quality regression gate (cached, 0 API calls)
+        run: uv run python scripts/check_eval_regression.py

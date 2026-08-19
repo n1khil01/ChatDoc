@@ -1,0 +1,23 @@
+.git
+.venv
+.env
+.env.*
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.model_cache
+data/uploads
+web
+node_modules
+tests
+scripts
+.github
+.claude
+*.md
+
+# eval/ code (prompt, gate, gemini_client, ...) is needed at import time by api/query_service.py
+# and api/routes_query.py, but its data is not: eval/pdfs is ~160MB of source PDFs and eval/data
+# holds eval-run outputs/caches, neither of which the serving image needs.
+eval/pdfs
+eval/data

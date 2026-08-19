@@ -1,0 +1,649 @@
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/components.css';
+@import './styles/landing.css';
+@import './styles/modal.css';
+
+/* ---------------------------------------------------------------------------
+ * App screens (documents, chat, PDF viewer).
+ * Tokenised against the design system; per-screen design passes follow.
+ * ------------------------------------------------------------------------ */
+
+.page {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.page-header h1 {
+  font-size: var(--text-2xl);
+  font-weight: 650;
+}
+
+.page-loading {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ---------- Documents ---------- */
+
+.upload-panel {
+  margin-bottom: var(--space-8);
+}
+
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 550;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.upload-button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--accent-soft);
+}
+
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.document-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+/* The name/actions line. Its own row so a processing document can stack the live
+   ingest readout underneath without the two fighting over one flex context. */
+.document-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.document-row:hover {
+  border-color: var(--border-strong);
+}
+
+.document-row-processing {
+  border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
+}
+
+/* Ready documents open chat on click anywhere in the row (except Delete, which stops
+   propagation). Cursor + a stronger hover border is the only way to signal that,
+   short of interactive elements everywhere. */
+.document-row-clickable {
+  cursor: pointer;
+}
+
+.document-row-clickable:hover {
+  border-color: var(--accent);
+}
+
+.document-row-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.document-info {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.document-name {
+  font-weight: 550;
+  letter-spacing: -0.01em;
+}
+
+.document-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex: none;
+}
+
+/* ---------- Live ingest progress ---------- */
+
+.ingest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-1);
+  animation: ingest-in var(--duration) var(--ease-out) both;
+}
+
+@keyframes ingest-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.ingest-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.ingest-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ingest-title {
+  font-size: var(--text-sm);
+  font-weight: 550;
+  color: var(--text);
+}
+
+/* Ring rather than a dot: it reads as "work happening" at a glance, and unlike a
+   spinner GIF it inherits the accent colour in both themes. */
+.ingest-spinner {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklab, var(--accent) 26%, transparent);
+  border-top-color: var(--accent);
+  animation: ingest-spin 0.7s linear infinite;
+}
+
+@keyframes ingest-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ingest-meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex: none;
+}
+
+.ingest-percent {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.ingest-elapsed {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ingest-bar {
+  position: relative;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--text) 8%, transparent);
+  overflow: hidden;
+}
+
+/* Interpolates across the client's 700ms poll interval, so four polled data points read as
+   one continuous fill. Linear (not eased) so the speed reflects the real work rate. */
+.ingest-bar-fill {
+  transition: width 700ms linear;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 70%, transparent), var(--accent));
+}
+
+/* Light sweep travelling over the filled portion, so the bar still reads as active
+   during a long embedding stage where the percentage moves slowly. */
+.ingest-bar-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--bg-raised) 55%, transparent),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: ingest-sweep 1.6s var(--ease-out) infinite;
+}
+
+@keyframes ingest-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.ingest-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ingest-stage {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  font-size: var(--text-xs);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.ingest-stage-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+}
+
+.ingest-stage-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ingest-stage-detail {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ingest-stage-pending {
+  color: var(--text-muted);
+  opacity: 0.55;
+}
+
+.ingest-stage-active {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.ingest-stage-active .ingest-stage-icon {
+  color: var(--accent);
+  animation: ingest-pulse 1.4s var(--ease-out) infinite;
+}
+
+.ingest-stage-active .ingest-stage-detail {
+  color: var(--accent);
+}
+
+@keyframes ingest-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.ingest-stage-done {
+  color: var(--text-muted);
+}
+
+.ingest-stage-done .ingest-stage-icon {
+  color: var(--success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ingest-spinner,
+  .ingest-bar-fill::after,
+  .ingest-stage-active .ingest-stage-icon {
+    animation: none;
+  }
+}
+
+.empty-state {
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
+
+/* ---------- Chat ---------- */
+
+.chat-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-layout {
+  display: flex;
+  gap: var(--space-6);
+  flex: 1;
+  min-height: 0;
+}
+
+.chat-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.chat-turns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+  /* Dark purple frame around the response area, present even before the first turn, so
+     the user can see where answers will land rather than discovering it only once text
+     appears. --accent-soft (not --border) keeps the tint purple rather than neutral. */
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklab, var(--accent) 4%, var(--bg-raised));
+}
+
+.chat-turns:empty {
+  min-height: 12rem;
+}
+
+.chat-turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Question bubble on the right (the user's side), response bubble on the left (ChatDoc's
+   side) -- the same left/right convention as any messaging UI, so which is which is
+   obvious at a glance instead of relying on reading order or bold text alone. */
+.chat-question {
+  align-self: flex-end;
+  max-width: 78%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--space-1);
+  background: var(--accent-solid);
+  color: var(--accent-on);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.chat-generating {
+  align-self: flex-start;
+  max-width: 78%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--space-1);
+  background: color-mix(in oklab, var(--text) 6%, var(--bg-overlay));
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.chat-generating .cursor {
+  animation: blink 1s step-start infinite;
+  color: var(--accent);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.chat-answer {
+  align-self: flex-start;
+  max-width: 78%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--space-1);
+  background: color-mix(in oklab, var(--text) 6%, var(--bg-overlay));
+  line-height: var(--leading-snug);
+}
+
+.chat-refusal {
+  align-self: flex-start;
+  max-width: 78%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid color-mix(in oklab, var(--refusal) 34%, var(--border));
+  border-left-width: 3px;
+  border-left-color: var(--refusal);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--space-1);
+  background: var(--refusal-soft);
+}
+
+.refusal-message {
+  font-weight: 550;
+  line-height: var(--leading-snug);
+}
+
+.chat-turn > .form-error {
+  align-self: flex-start;
+  max-width: 78%;
+}
+
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.chat-input-row .input {
+  flex: 1;
+}
+
+/* ---------- PDF viewer ---------- */
+
+.pdf-viewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.pdf-viewer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.pdf-viewer-canvas-wrap {
+  position: relative;
+  overflow: auto;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  background: var(--pdf-canvas-bg);
+  padding: var(--space-4) 0;
+}
+
+.pdf-page-box {
+  position: relative;
+  display: inline-block;
+  height: fit-content;
+  border-radius: 2px;
+}
+
+.pdf-viewer-canvas-wrap canvas {
+  box-shadow: var(--shadow-lg);
+}
+
+.pdf-highlight {
+  position: absolute;
+  background: color-mix(in oklab, var(--citation) 32%, transparent);
+  border: 1.5px solid var(--citation);
+  border-radius: 2px;
+  pointer-events: none;
+  animation: highlight-in var(--duration) var(--ease-out);
+}
+
+@keyframes highlight-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pdf-page-flash {
+  animation: page-flash 0.9s ease-out;
+}
+
+@keyframes page-flash {
+  0% {
+    box-shadow: 0 0 0 4px var(--citation);
+  }
+  100% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+.pdf-viewer-error {
+  padding: var(--space-4);
+  color: var(--danger);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 900px) {
+  .chat-page {
+    height: auto;
+  }
+
+  .chat-layout {
+    flex-direction: column;
+  }
+
+  .viewer-column {
+    min-height: 32rem;
+  }
+}
+
+/* ---------- Cold-start banner ---------- */
+
+.waking-banner {
+  position: fixed;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--border));
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-md, var(--shadow-sm));
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  animation: waking-banner-in var(--duration) var(--ease-out);
+}
+
+.waking-banner .spinner {
+  color: var(--accent);
+}
+
+@keyframes waking-banner-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 480px) {
+  .waking-banner {
+    left: var(--space-4);
+    right: var(--space-4);
+    transform: none;
+  }
+
+  @keyframes waking-banner-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

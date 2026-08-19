@@ -1,0 +1,159 @@
+/* ChatDoc design tokens.
+ *
+ * Dark-first: the product is a technical instrument for reading dense financial
+ * documents, and the dark canvas is what lets the one accent colour actually carry
+ * meaning. Light mode is a full peer theme, not an afterthought -- every token below
+ * is redefined, so nothing inherits a dark value onto a light ground.
+ *
+ * Colour discipline (PROJECT_PLAN.md §7 Phase 3): one accent, spent deliberately.
+ *   --accent    violet    interactive + brand only
+ *   --citation  amber     citations and PDF highlights, nothing else
+ *   --refusal   orange    the refusal state -- deliberately NOT red, because a
+ *                         refusal is the product working, not an error
+ *   --danger    red       actual failures only
+ */
+
+:root {
+  /* ---- Type ---- */
+  --font-display: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-display: clamp(2.75rem, 7vw, 4.75rem);
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.35;
+  --leading-normal: 1.6;
+
+  /* ---- Spacing: 4px rhythm ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* ---- Radii ---- */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 130ms;
+  --duration: 220ms;
+  --duration-slow: 420ms;
+
+  /* ---- Layout ---- */
+  --nav-height: 4.25rem;
+  --content-max: 1200px;
+}
+
+/* ---- Dark theme (default) ---- */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #08080c;
+  --bg-raised: #101018;
+  --bg-overlay: #16161f;
+  --bg-input: #0d0d14;
+  --bg-scrim: rgba(4, 4, 8, 0.72);
+
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.17);
+
+  --text: #f2f2f7;
+  --text-secondary: #9d9daf;
+  /* Measured 4.76:1 on --bg. "Muted" still has to clear AA -- the earlier #6a6a7d
+     came in at 3.80 and failed for the 12px labels that use it. */
+  --text-muted: #767689;
+
+  /* --accent is tuned as *text* on --bg (4.60:1). --accent-solid is tuned as a *fill*
+     under white text (4.77:1) -- the two pull in opposite directions, so a single
+     violet cannot clear AA in both roles. */
+  --accent: #7c5cff;
+  --accent-solid: #7554fa;
+  --accent-hover: #9179ff;
+  --accent-on: #ffffff;
+  --accent-soft: rgba(124, 92, 255, 0.15);
+  --accent-2: #22d3ee;
+
+  --citation: #fbbf24;
+  --citation-soft: rgba(251, 191, 36, 0.16);
+  --citation-ink: #1a1206;
+
+  --refusal: #fb923c;
+  --refusal-soft: rgba(251, 146, 60, 0.13);
+
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.13);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.13);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 48px rgba(124, 92, 255, 0.32);
+
+  --pdf-canvas-bg: #06060a;
+}
+
+/* ---- Light theme ---- */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #fbfbfd;
+  --bg-raised: #ffffff;
+  --bg-overlay: #ffffff;
+  --bg-input: #ffffff;
+  --bg-scrim: rgba(16, 16, 28, 0.42);
+
+  --border: rgba(12, 12, 24, 0.11);
+  --border-strong: rgba(12, 12, 24, 0.22);
+
+  --text: #0d0d14;
+  --text-secondary: #53536a;
+  /* Measured 4.82:1 on --bg (was #84849a at 3.53, below AA). */
+  --text-muted: #6e6e85;
+
+  --accent: #5b30ea;
+  --accent-solid: #5b30ea; /* 6.81:1 under white text -- no separate fill needed here */
+  --accent-hover: #4a22d4;
+  --accent-on: #ffffff;
+  --accent-soft: rgba(91, 48, 234, 0.09);
+  --accent-2: #0891b2;
+
+  --citation: #a45c07;
+  --citation-soft: rgba(251, 191, 36, 0.22);
+  --citation-ink: #3d2205;
+
+  --refusal: #c2410c;
+  --refusal-soft: rgba(251, 146, 60, 0.14);
+
+  --danger: #d02525;
+  --danger-soft: rgba(208, 37, 37, 0.09);
+  --success: #047f5b;
+  --success-soft: rgba(4, 127, 91, 0.1);
+
+  --shadow-sm: 0 1px 2px rgba(16, 16, 40, 0.07);
+  --shadow: 0 8px 24px rgba(16, 16, 40, 0.09);
+  --shadow-lg: 0 24px 64px rgba(16, 16, 40, 0.14);
+  --glow-accent: 0 0 48px rgba(91, 48, 234, 0.18);
+
+  --pdf-canvas-bg: #6b7280;
+}

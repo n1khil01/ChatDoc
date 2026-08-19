@@ -17,5 +17,36 @@ services:
       timeout: 5s
       retries: 10
 
+  # api and worker share the Dockerfile image built above; only CMD differs (PROJECT_PLAN.md
+  # §7 Phase 4 -- "one image, two roles"). Optional for day-to-day dev (uvicorn --reload and
+  # `uv run python -m api.worker` on the host are faster to iterate on); real containers here
+  # are what scripts/kill_worker_test.py needs to prove crash safety against an actual process
+  # boundary rather than a Python thread.
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://chatdoc:chatdoc@db:5432/chatdoc
+      CLIENT_ORIGIN: http://localhost:5173
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - chatdoc_uploads:/app/data/uploads
+
+  worker:
+    build: .
+    command: ["uv", "run", "python", "-m", "api.worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://chatdoc:chatdoc@db:5432/chatdoc
+    volumes:
+      - chatdoc_uploads:/app/data/uploads
+
 volumes:
   chatdoc_pg_data:
+  chatdoc_uploads:

@@ -14,6 +14,7 @@ this project does not silently ingest nothing.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -116,8 +117,12 @@ def _nearest_header(headers: list[tuple[float, str]], y: float) -> str | None:
     return best
 
 
-def _prose_paragraphs(page, table_bboxes: list[tuple[float, float, float, float]]) -> list[tuple[str, float]]:
-    """Return (paragraph_text, y0) for text blocks not overlapping a detected table bbox."""
+def _prose_paragraphs(
+    page, table_bboxes: list[tuple[float, float, float, float]]
+) -> list[tuple[str, tuple[float, float, float, float]]]:
+    """Return (paragraph_text, bbox) for text blocks not overlapping a detected table bbox.
+    The bbox is the paragraph's own block bbox -- carried onto prose chunks so citation
+    click-through can highlight the actual paragraph a claim came from, not just the page."""
     d = page.get_text("dict")
     paras = []
     for block in d.get("blocks", []):
@@ -134,7 +139,7 @@ def _prose_paragraphs(page, table_bboxes: list[tuple[float, float, float, float]
             span["text"] for line in block.get("lines", []) for span in line.get("spans", [])
         ).strip()
         if text:
-            paras.append((text, by0))
+            paras.append((text, (bx0, by0, bx1, by1)))
     return paras
 
 
@@ -152,12 +157,20 @@ def _split_prose(text: str) -> list[str]:
     return chunks
 
 
-def chunk_pdf(pdf_path: Path, excluded_pages: frozenset[int] = frozenset()) -> DocumentChunks:
+def chunk_pdf(
+    pdf_path: Path,
+    excluded_pages: frozenset[int] = frozenset(),
+    on_page: Callable[[int, int, int], None] | None = None,
+) -> DocumentChunks:
     """Table-aware chunking: one atomic markdown chunk per detected table (with scale/unit
     metadata + bbox), plus paragraph-grouped prose chunks carrying the nearest section header.
 
     `excluded_pages` drops those pages entirely (used for N1 evidence-ablation negatives,
     mirroring eval/run_retrieval_eval.py's naive baseline behavior).
+
+    `on_page(pages_done, page_count, chunks_so_far)` is called after each page so a caller
+    can report live progress. Page-level is the right granularity here: table detection is
+    the slow part of this loop, so per-page is both cheap to emit and visibly monotonic.
     """
     doc = pymupdf.open(pdf_path)
     try:
@@ -167,6 +180,8 @@ def chunk_pdf(pdf_path: Path, excluded_pages: frozenset[int] = frozenset()) -> D
 
         for page_num in range(page_count):
             if page_num in excluded_pages:
+                if on_page is not None:
+                    on_page(page_num + 1, page_count, len(result.chunks))
                 continue
             page = doc.load_page(page_num)
             page_text = page.get_text()
@@ -212,13 +227,22 @@ def chunk_pdf(pdf_path: Path, excluded_pages: frozenset[int] = frozenset()) -> D
             buf: list[str] = []
             buf_len = 0
             buf_header: str | None = None
-            buf_y0: float | None = None
+            buf_bboxes: list[tuple[float, float, float, float]] = []
 
             def flush():
-                nonlocal buf, buf_len, buf_header, buf_y0
+                nonlocal buf, buf_len, buf_header, buf_bboxes
                 if not buf:
                     return
                 joined = "\n".join(buf)
+                # Union of the source paragraphs' bboxes -- an honest approximation (the
+                # region a chunk's text came from, not a word-level highlight) that still
+                # narrows citation click-through to the paragraph(s), not the whole page.
+                union_bbox = (
+                    min(b[0] for b in buf_bboxes),
+                    min(b[1] for b in buf_bboxes),
+                    max(b[2] for b in buf_bboxes),
+                    max(b[3] for b in buf_bboxes),
+                )
                 for piece in _split_prose(joined):
                     prefixed = f"{buf_header}\n\n{piece}" if buf_header else piece
                     result.chunks.append(
@@ -227,21 +251,26 @@ def chunk_pdf(pdf_path: Path, excluded_pages: frozenset[int] = frozenset()) -> D
                             chunk_type="prose",
                             text=_clean(prefixed),
                             section_header=_clean(buf_header) if buf_header else None,
+                            bbox=union_bbox,
                         )
                     )
                 buf = []
                 buf_len = 0
+                buf_bboxes = []
 
-            for text, y0 in paragraphs:
-                header = _nearest_header(headers, y0)
+            for text, bbox in paragraphs:
+                header = _nearest_header(headers, bbox[1])
                 if buf and buf_len + len(text) > PROSE_CHUNK_CHARS:
                     flush()
                 if buf_header is None:
                     buf_header = header
                 buf.append(text)
                 buf_len += len(text)
-                buf_y0 = y0
+                buf_bboxes.append(bbox)
             flush()
+
+            if on_page is not None:
+                on_page(page_num + 1, page_count, len(result.chunks))
 
         if not any_text:
             raise EmptyTextLayerError(
