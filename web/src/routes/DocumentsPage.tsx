@@ -6,7 +6,7 @@ import { ApiError } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { IngestProgress } from '../components/IngestProgress'
-import { LogoMark } from '../components/icons'
+import { Chat, LogoMark, Trash, Upload } from '../components/icons'
 
 export function DocumentsPage() {
   const { user, logout } = useAuth()
@@ -83,6 +83,7 @@ export function DocumentsPage() {
 
       <section className="upload-panel">
         <label className="upload-button">
+          <Upload />
           {uploadMutation.isPending ? 'Uploading…' : 'Upload a PDF'}
           <input
             ref={fileInputRef}
@@ -135,21 +136,23 @@ export function DocumentsPage() {
                   <div className="document-actions">
                     {isReady && (
                       <Link
-                        className="btn btn-secondary"
+                        className="btn btn-secondary btn-icon"
                         to={`/documents/${doc.id}/chat`}
                         onClick={(e) => e.stopPropagation()}
+                        aria-label="Ask a question about this document"
                       >
-                        Ask
+                        <Chat />
                       </Link>
                     )}
                     <button
-                      className="btn btn-danger-ghost"
+                      className="btn btn-danger-ghost btn-icon"
                       onClick={(e) => {
                         e.stopPropagation()
                         deleteMutation.mutate(doc.id)
                       }}
+                      aria-label="Delete document"
                     >
-                      Delete
+                      <Trash />
                     </button>
                   </div>
                 </div>

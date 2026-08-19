@@ -26,6 +26,11 @@ the excerpt(s) it came from in "citations". If the figure is derived (a growth r
 ratio, a difference), do not just state the result -- populate "operands" with each input \
 value and the chunk_id of the excerpt it came from.
   - If sufficient and the answer is not a single figure: set "answer_text" and "citations".
+  - Each citation's "quote" MUST be copied verbatim, character-for-character, from its \
+excerpt -- the shortest exact phrase or sentence that directly supports the answer. Never \
+paraphrase it, summarize it, or copy more than that one supporting phrase or sentence: the \
+quote is used to locate and highlight that exact text in the source document, so anything \
+longer than necessary, or not an exact substring of the excerpt, breaks that highlight.
   - If not sufficient: set "sufficient": false and leave the other fields empty/null.
   - Every "chunk_id" you reference (in "citations" or "operands") MUST be the id of one of \
 the excerpts shown below -- never invent one.

@@ -33,6 +33,15 @@
   transform: translateY(1px);
 }
 
+/* Sized relative to the button's own font-size (em) rather than a fixed rem value, so an
+   icon next to a label scales consistently across .btn-lg and the default size instead of
+   needing its own override at each. */
+.btn svg {
+  width: 1.05em;
+  height: 1.05em;
+  flex: none;
+}
+
 .btn-primary {
   background: var(--accent-solid);
   color: var(--accent-on);
@@ -75,6 +84,13 @@
 .btn-lg {
   padding: 0.8125rem 1.5rem;
   font-size: var(--text-base);
+}
+
+/* Trailing-arrow variant: the arrow already reads as the edge of the button, so the same
+   right padding as the plain label leaves a noticeably wider gap on that side than the
+   left. Pull it in modestly -- just enough room to breathe after the arrow, not flush. */
+.btn-lg-arrow {
+  padding-right: 1.125rem;
 }
 
 .btn-icon {

@@ -92,9 +92,14 @@
   align-items: center;
   gap: var(--space-3);
   color: var(--text);
-  font-size: var(--text-lg);
+  /* Instrument Serif (the hero's display face) read as too tall/narrow at wordmark size --
+     a serif built for large headlines, not a compact label. Inter (the body sans) with
+     open tracking instead: wider letterforms and a semibold weight give it presence
+     without the vertically-stretched look. */
+  font-family: var(--font-sans);
+  font-size: var(--text-xl);
   font-weight: 650;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.005em;
 }
 
 .brand:hover {
@@ -104,9 +109,9 @@
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 1.875rem;
-  height: 1.875rem;
-  border-radius: 9px;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
   background: linear-gradient(140deg, var(--accent), var(--accent-2));
   color: #fff;
   box-shadow: var(--glow-accent);
@@ -114,8 +119,8 @@
 }
 
 .brand-mark svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 /* ---------- Hero ---------- */

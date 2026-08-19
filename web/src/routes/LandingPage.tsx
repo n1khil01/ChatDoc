@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { AuthModal, type AuthMode } from '../components/AuthModal'
 import { AnimatedAnswerCard } from '../components/AnimatedAnswerCard'
 import { ThemeToggle } from '../components/ThemeToggle'
-import { CheckShield, Crosshair, Layers, LogoMark } from '../components/icons'
+import { ArrowRight, CheckShield, Crosshair, Layers, LogoMark } from '../components/icons'
 
 interface Props {
   /** /login and /register deep-link straight into the modal. */
@@ -69,12 +69,19 @@ export function LandingPage({ initialAuth }: Props) {
           <div className="hero-cta rise rise-3">
             <button
               type="button"
-              className="btn btn-primary btn-lg"
+              className={`btn btn-primary btn-lg${user ? ' btn-lg-arrow' : ''}`}
               onClick={() => (user ? navigate('/documents') : setAuthMode('register'))}
             >
-              {user ? 'Go to documents' : 'Get started'}
+              {user ? (
+                <>
+                  Go to documents
+                  <ArrowRight />
+                </>
+              ) : (
+                'Get started'
+              )}
             </button>
-            <span className="hero-cta-note">Free, no card required</span>
+            {!user && <span className="hero-cta-note">Free, no card required</span>}
           </div>
         </div>
 

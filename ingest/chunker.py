@@ -256,11 +256,19 @@ def chunk_pdf(
                     )
                 buf = []
                 buf_len = 0
+                buf_header = None
                 buf_bboxes = []
 
             for text, bbox in paragraphs:
                 header = _nearest_header(headers, bbox[1])
-                if buf and buf_len + len(text) > PROSE_CHUNK_CHARS:
+                # Flush on a section-header change as well as the character budget --
+                # otherwise a chunk's bbox is the union of paragraphs scattered across
+                # multiple sections (e.g. a title block through several headings down
+                # the page), which blows up the citation highlight to cover most of
+                # the page instead of the paragraph(s) actually cited. buf_header is
+                # reset in flush() so a later chunk on the same page picks up its own
+                # section's header rather than reusing the first chunk's.
+                if buf and (buf_len + len(text) > PROSE_CHUNK_CHARS or header != buf_header):
                     flush()
                 if buf_header is None:
                     buf_header = header

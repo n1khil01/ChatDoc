@@ -147,7 +147,12 @@ export function ChatPage() {
                 <p className="chat-question">{turn.question}</p>
                 {turn.kind === 'generating' && (
                   <p className="chat-generating">
-                    Generating<span className="cursor">▍</span>
+                    Generating
+                    <span className="generating-dots" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </span>
                   </p>
                 )}
                 {turn.kind === 'answer' && (
@@ -190,7 +195,7 @@ export function ChatPage() {
               className="input"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ask a question about this document…"
+              placeholder="Ask a question about this document"
               aria-label="Ask a question about this document"
               disabled={generating}
             />

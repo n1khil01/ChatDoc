@@ -66,6 +66,12 @@
     background var(--duration-fast) var(--ease-out);
 }
 
+.upload-button svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
 .upload-button:hover {
   border-color: var(--accent);
   color: var(--text);
@@ -120,6 +126,15 @@
 .document-row-clickable:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* The Ask/Delete icon buttons had no explicit icon size, so the SVGs fell back to the
+   browser's unstyled default rather than sitting centered and properly scaled inside
+   the .btn-icon square -- size and center them deliberately here. */
+.document-actions svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  flex: none;
 }
 
 .document-info {
@@ -427,14 +442,40 @@
   font-size: var(--text-sm);
 }
 
-.chat-generating .cursor {
-  animation: blink 1s step-start infinite;
-  color: var(--accent);
+/* Three dots fading in one after another on a loop, "Generating..." typing-indicator
+   style, rather than a static cursor sitting next to the word. */
+.generating-dots {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: 4px;
+  vertical-align: baseline;
 }
 
-@keyframes blink {
-  50% {
-    opacity: 0;
+.generating-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.2;
+  animation: dot-fade 1.4s ease-in-out infinite;
+}
+
+.generating-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.generating-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-fade {
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
   }
 }
 
@@ -519,25 +560,74 @@
   font-size: var(--text-sm);
 }
 
+.pdf-page-field {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Width is set inline (PdfViewer.tsx) from the actual digit count of the page number/total
+   -- fixed ch values here clipped once a document passed 9 pages. content-box overrides the
+   app-wide border-box reset so that inline ch width sizes the digits themselves, with padding
+   and border added on top instead of eating into it (border-box was clipping the last digit). */
+.pdf-page-input {
+  box-sizing: content-box;
+  margin: 0 0.35ch;
+  padding: 1px 2px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+
+.pdf-page-input:hover {
+  border-color: var(--border-strong);
+}
+
+.pdf-page-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-input);
+}
+
+/* Single scrollable element spanning the full viewer width -- its native scrollbar sits
+   at that fixed outer edge (the same edge the toolbar above spans to). Pages render at
+   their own natural scaled width and are centered inside; any leftover space between a
+   page's edge and the true container edge is just background, not trimmed away. */
 .pdf-viewer-canvas-wrap {
   position: relative;
   overflow: auto;
   flex: 1;
+  /* Every page stacks vertically now (continuous scroll) instead of one page swapped in
+     at a time -- column direction with each page centered horizontally. A small seam
+     between pages (not --space-5's 20px) reads more like a real document than a gap. */
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   background: var(--pdf-canvas-bg);
   padding: var(--space-4) 0;
 }
 
 .pdf-page-box {
   position: relative;
-  display: inline-block;
-  height: fit-content;
   border-radius: 2px;
+  flex: none;
+  /* A page that hasn't rasterized yet (still outside the render lookahead, or the network
+     is slow) would otherwise show the dark viewer background straight through its empty
+     placeholder box while scrolling past it -- a plain white fill reads as "a blank page
+     loading" instead of a hole in the middle of the document. */
+  background: #fff;
 }
 
 .pdf-viewer-canvas-wrap canvas {
-  box-shadow: var(--shadow-lg);
+  /* No CSS width/height here on purpose -- the canvas's bitmap resolution (set in
+     renderPage) and its display size should be the exact same integer pixel values, so it
+     renders at native resolution. Forcing a CSS size (e.g. 100% of the placeholder box)
+     stretches a bitmap that's off by a fraction of a pixel from that box, which blurs it. */
+  display: block;
 }
 
 .pdf-highlight {

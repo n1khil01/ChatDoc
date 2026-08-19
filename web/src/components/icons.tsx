@@ -80,6 +80,44 @@ export function Check() {
   )
 }
 
+export function ArrowRight() {
+  return (
+    <svg {...base} strokeWidth={2.75}>
+      <path d="M4 12h16M13 5l7 7-7 7" />
+    </svg>
+  )
+}
+
+export function Chat() {
+  return (
+    <svg {...base}>
+      <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-5 3.5z" />
+      <path d="M8 8.75h8M8 12h5" />
+    </svg>
+  )
+}
+
+export function Trash() {
+  return (
+    <svg {...base}>
+      <path d="M4.5 7h15" />
+      <path d="M9 7V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v2" />
+      <path d="M6.5 7l.9 12.4A2 2 0 0 0 9.4 21h5.2a2 2 0 0 0 2-1.6L17.5 7" />
+      <path d="M10.25 10.75v6.5M13.75 10.75v6.5" />
+    </svg>
+  )
+}
+
+export function Upload() {
+  return (
+    <svg {...base}>
+      <path d="M12 16V4" />
+      <path d="M7 9l5-5 5 5" />
+      <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+    </svg>
+  )
+}
+
 /* Ingest pipeline stage icons, one per step in ingest/pipeline.py. */
 
 export function PageScan() {
