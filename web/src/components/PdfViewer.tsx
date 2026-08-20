@@ -141,8 +141,15 @@ async function findQuoteRects(
       [0, item.height],
       [item.width, item.height],
     ].map(([lx, ly]) => {
-      const [px, py] = pdfjsLib.Util.applyTransform([lx, ly], item.transform)
-      return viewport.convertToViewportPoint(px, py)
+      // pdfjs-dist's .d.ts declares applyTransform as returning `void` and
+      // convertToViewportPoint as `any[]` -- both actually return a 2-element numeric
+      // array at runtime; the type stubs are just imprecise here, not a real void/any
+      // result, so this is a type-only cast, not a behavior change.
+      const [px, py] = pdfjsLib.Util.applyTransform([lx, ly], item.transform) as unknown as [
+        number,
+        number,
+      ]
+      return viewport.convertToViewportPoint(px, py) as [number, number]
     })
     const xs = corners.map((c) => c[0])
     const ys = corners.map((c) => c[1])
