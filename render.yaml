@@ -1,7 +1,14 @@
-# Render Blueprint (PROJECT_PLAN.md §7 Phase 4 "Vercel + Render (Docker) + Neon"): defines
-# both services from the one Dockerfile ("one image, two roles" -- see api/worker.py's
-# docstring) as code, so they're created together from one Blueprint deploy instead of two
-# separate manual service setups that can drift out of sync with each other.
+# Render Blueprint (PROJECT_PLAN.md §7 Phase 4 "Vercel + Render (Docker) + Neon"): a single
+# Web Service running both the API and the ingest worker.
+#
+# Originally two services (a Web Service + a Background Worker) from the same Dockerfile.
+# Render's free plan does not offer the Background Worker service type at all (confirmed
+# against the actual dashboard, not just docs), so RUN_WORKER_INLINE=true here makes
+# api/app.py start api/worker.py's poll loop as a daemon thread inside this same process
+# instead. See api/app.py's lifespan handler for why this doesn't weaken the crash-safety
+# story: the `jobs` table's SKIP LOCKED + visible_at reclaim works the same whether the
+# process that restarts and reclaims an orphaned job is a separate worker or this same web
+# process waking back up after Render's own spin-down.
 #
 # Secrets (sync: false below) are NOT set here -- Render prompts for them once at Blueprint
 # creation time and stores them per-service; they are never committed to this file or the repo.
@@ -15,31 +22,13 @@ services:
     plan: free
     healthCheckPath: /healthz
     envVars:
+      - key: RUN_WORKER_INLINE
+        value: "true"
       - key: DATABASE_URL
         sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: CLIENT_ORIGIN
-        sync: false
-      - key: R2_ACCOUNT_ID
-        sync: false
-      - key: R2_ACCESS_KEY_ID
-        sync: false
-      - key: R2_SECRET_ACCESS_KEY
-        sync: false
-      - key: R2_BUCKET_NAME
-        sync: false
-
-  - type: worker
-    name: chatdoc-worker
-    runtime: docker
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
-    dockerCommand: uv run python -m api.worker
-    region: ohio
-    plan: free
-    envVars:
-      - key: DATABASE_URL
         sync: false
       - key: R2_ACCOUNT_ID
         sync: false
