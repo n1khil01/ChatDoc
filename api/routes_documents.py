@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import uuid
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 
 from api.csrf import verify_csrf
 from api.deps import get_current_user_id
@@ -16,11 +15,10 @@ from api.documents_repo import (
 )
 from api.jobs_repo import MAX_QUEUE_DEPTH, enqueue_job, queue_depth
 from api.schemas_documents import DocumentResponse
+from api.storage import get_storage
 from api.worker import MAX_FILE_SIZE_BYTES
 
 router = APIRouter(prefix="/documents", tags=["documents"])
-
-UPLOAD_DIR = Path(__file__).parent.parent / "data" / "uploads"
 
 
 def _to_response(row) -> DocumentResponse:
@@ -79,14 +77,13 @@ async def upload_doc(
             f"file exceeds the {MAX_FILE_SIZE_BYTES // (1024 * 1024)}MB limit",
         )
 
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     doc_key = f"user{user_id}_{uuid.uuid4().hex[:12]}"
-    dest_path = UPLOAD_DIR / f"{doc_key}.pdf"
-    dest_path.write_bytes(contents)
+    storage_key = f"{doc_key}.pdf"
+    get_storage().save(storage_key, contents)
 
     display_name = file.filename or "document.pdf"
-    document_id = create_pending_document(user_id, doc_key, display_name, str(dest_path))
-    enqueue_job(document_id, doc_key, str(dest_path))
+    document_id = create_pending_document(user_id, doc_key, display_name, storage_key)
+    enqueue_job(document_id, doc_key, storage_key)
 
     row = get_document(user_id, document_id)
     return _to_response(row)
@@ -97,10 +94,19 @@ def get_doc_file(document_id: int, user_id: int = Depends(get_current_user_id)):
     row = get_document(user_id, document_id)
     if row is None or row.status != "ready":
         raise HTTPException(status.HTTP_404_NOT_FOUND, "document not found")
-    path = Path(row.source_path)
-    if not path.is_file():
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "document file missing on disk")
-    return FileResponse(path, media_type="application/pdf")
+    # Proxy-streamed rather than a redirect to a presigned R2 URL: keeps the ownership
+    # check above as the only gate a client ever has to satisfy, and keeps pdf.js's fetch
+    # (see web/src/lib/api.ts's documentFileUrl) pointed at the API's own origin either way,
+    # local disk or R2, with no client-side branching on storage backend.
+    #
+    # stream() is a generator -- calling it never runs its body, so a missing-key check has
+    # to happen explicitly here rather than via try/except around the call, or a StorageError
+    # would surface mid-response (inside StreamingResponse's iteration) instead of as a
+    # clean 404.
+    storage = get_storage()
+    if not storage.exists(row.source_path):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "document file missing in storage")
+    return StreamingResponse(storage.stream(row.source_path), media_type="application/pdf")
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -114,6 +120,4 @@ def delete_doc(document_id: int, request: Request, user_id: int = Depends(get_cu
     # No explicit cancellation needed even if this document is mid-ingest: jobs.document_id
     # cascade-deletes with the row above, so the worker's completion/failure writes just
     # affect zero rows once it gets there -- see api/worker.py's process_job docstring.
-    path = Path(row.source_path)
-    if path.is_file():
-        path.unlink()
+    get_storage().delete(row.source_path)

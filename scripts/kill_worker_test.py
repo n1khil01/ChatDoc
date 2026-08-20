@@ -18,7 +18,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import shutil
 import subprocess
 import sys
 import time
@@ -30,6 +29,7 @@ sys.path.insert(0, str(ROOT))
 
 from api.documents_repo import create_pending_document  # noqa: E402
 from api.jobs_repo import VISIBILITY_TIMEOUT_S, enqueue_job, get_job_status  # noqa: E402
+from api.storage import get_storage  # noqa: E402
 from ingest.db import get_conn  # noqa: E402
 
 # Kept short for a fast test run -- real worker deploys use jobs_repo.VISIBILITY_TIMEOUT_S
@@ -67,15 +67,13 @@ def main() -> None:
         )
         sys.exit(1)
 
-    upload_dir = ROOT / "data" / "uploads"
-    upload_dir.mkdir(parents=True, exist_ok=True)
     doc_key = f"killtest_{uuid.uuid4().hex[:12]}"
-    dest_path = upload_dir / f"{doc_key}.pdf"
-    shutil.copy(pdf_source, dest_path)
+    storage_key = f"{doc_key}.pdf"
+    get_storage().save(storage_key, pdf_source.read_bytes())
 
     print(f"[1/6] Enqueuing job for {pdf_source.name} as {doc_key}")
-    document_id = create_pending_document(None, doc_key, pdf_source.name, str(dest_path))
-    job_id = enqueue_job(document_id, doc_key, str(dest_path))
+    document_id = create_pending_document(None, doc_key, pdf_source.name, storage_key)
+    job_id = enqueue_job(document_id, doc_key, storage_key)
     print(f"      document_id={document_id} job_id={job_id}")
 
     print("[2/6] Starting worker #1")
@@ -128,7 +126,7 @@ def main() -> None:
 
     with get_conn() as conn:
         conn.execute("DELETE FROM documents WHERE id = %s", (document_id,))
-    dest_path.unlink(missing_ok=True)
+    get_storage().delete(storage_key)
 
 
 if __name__ == "__main__":

@@ -20,12 +20,12 @@ from __future__ import annotations
 
 import logging
 import time
-from pathlib import Path
 
 import pymupdf
 
 from api.documents_repo import mark_document_failed, mark_document_ready, update_document_stage
 from api.jobs_repo import JobRow, claim_job, complete_job, fail_job
+from api.storage import StorageError, get_storage
 from ingest.db import get_conn
 from ingest.pipeline import ingest_pdf
 
@@ -72,27 +72,39 @@ def _make_progress_writer(document_id: int):
 
 def process_job(job: JobRow) -> None:
     """One job's worth of work. Split out from the poll loop so tests can drive it directly
-    without needing to run the loop for a fixed wall-clock duration."""
-    pdf_path = Path(job.pdf_path)
+    without needing to run the loop for a fixed wall-clock duration.
+
+    `job.pdf_path` is a storage key (api/storage.py), not a filesystem path -- it may be a
+    local file (dev/CI) or an R2 object (deployed), and this function doesn't need to know
+    which. `open_local` downloads-to-temp-then-cleans-up for R2, or just yields the existing
+    path for local storage.
+    """
+    storage = get_storage()
 
     if not _document_exists(job.document_id):
         # Deleted while queued (never started) -- nothing to clean up on the DB side, the
-        # job row is already gone via cascade; just drop the orphaned file if it's still here.
-        if pdf_path.is_file():
-            pdf_path.unlink()
+        # job row is already gone via cascade; just drop the orphaned blob if it's still here.
+        storage.delete(job.pdf_path)
         return
 
     try:
-        page_count = pymupdf.open(pdf_path).page_count
-        if page_count > MAX_PAGE_COUNT:
-            raise ValueError(f"{page_count} pages exceeds the {MAX_PAGE_COUNT}-page limit")
+        with storage.open_local(job.pdf_path) as pdf_path:
+            page_count = pymupdf.open(pdf_path).page_count
+            if page_count > MAX_PAGE_COUNT:
+                raise ValueError(f"{page_count} pages exceeds the {MAX_PAGE_COUNT}-page limit")
 
-        on_progress, progress_state = _make_progress_writer(job.document_id)
-        with get_conn() as conn:
-            ingest_pdf(conn, pdf_path, doc_key=job.doc_key, on_progress=on_progress)
+            on_progress, progress_state = _make_progress_writer(job.document_id)
+            with get_conn() as conn:
+                ingest_pdf(conn, pdf_path, doc_key=job.doc_key, on_progress=on_progress)
         mark_document_ready(job.document_id, chunk_count=progress_state["chunk_count"])
         complete_job(job.id)
         log.info("job %s document %s done", job.id, job.document_id)
+    except StorageError:
+        # The blob itself is gone (e.g. deleted mid-flight, see routes_documents.delete_doc) --
+        # treat like the pre-flight existence check above rather than retrying a job that can
+        # never succeed.
+        fail_job(job.id, "source PDF missing from storage")
+        log.warning("job %s document %s: source PDF missing from storage", job.id, job.document_id)
     except Exception as exc:  # noqa: BLE001 - a bad PDF must dead-letter, never crash the worker
         will_retry = fail_job(job.id, str(exc))
         if will_retry:

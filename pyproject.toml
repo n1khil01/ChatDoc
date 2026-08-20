@@ -5,6 +5,7 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
     "argon2-cffi>=23.1.0",
+    "boto3>=1.43.75",
     "email-validator>=2.2.0",
     "fastapi>=0.115.0",
     "fastembed>=0.8.0",

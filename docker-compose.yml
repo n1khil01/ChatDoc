@@ -31,6 +31,12 @@ services:
       DATABASE_URL: postgresql://chatdoc:chatdoc@db:5432/chatdoc
       CLIENT_ORIGIN: http://localhost:5173
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # api/storage.py falls back to the local chatdoc_uploads volume below when these are
+      # unset -- set all four in .env to exercise the real R2 path locally instead.
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME:-}
     ports:
       - "8000:8000"
     volumes:
@@ -44,6 +50,10 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://chatdoc:chatdoc@db:5432/chatdoc
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME:-}
     volumes:
       - chatdoc_uploads:/app/data/uploads
 
