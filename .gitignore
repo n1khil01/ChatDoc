@@ -26,6 +26,14 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# The `lib/` rule below is unanchored, so it matches ANY directory named `lib` anywhere in
+# the tree, not just a Python build/lib/ output -- it was silently excluding
+# web/src/lib/{api,api-types,queryStream}.ts from every commit until this comment was added.
+# Keep the original rule (still useful for Python builds) but explicitly un-ignore the one
+# real source directory it was catching by accident.
+!web/src/lib/
+!web/src/lib/**
+
 # PyInstaller
 #   Usually these files are written by a python script from a template
 #   before PyInstaller builds the exe, so as to inject date/other infos into it.
