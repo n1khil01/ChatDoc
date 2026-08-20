@@ -11,6 +11,8 @@ import secrets
 
 from fastapi import HTTPException, Request, Response, status
 
+from api.auth import COOKIE_SAMESITE, COOKIE_SECURE
+
 CSRF_COOKIE_NAME = "chatdoc_csrf"
 CSRF_HEADER_NAME = "x-csrf-token"
 
@@ -31,7 +33,8 @@ def issue_csrf_cookie(response: Response, token: str | None = None) -> None:
         key=CSRF_COOKIE_NAME,
         value=token,
         httponly=False,
-        samesite="lax",
+        samesite=COOKIE_SAMESITE,
+        secure=COOKIE_SECURE,
         path="/",
     )
 

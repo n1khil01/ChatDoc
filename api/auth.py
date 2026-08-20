@@ -30,6 +30,15 @@ ABSOLUTE_SESSION_TTL = timedelta(days=14)
 # Set COOKIE_SECURE=1 in production (Render serves the API over HTTPS).
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "0") == "1"
 
+# `SameSite=Lax` is sent on same-site requests (including cross-*origin* ones sharing a
+# registrable domain, e.g. localhost:5173 -> localhost:8000, or subdomain.example.com ->
+# api.example.com) but browsers withhold it on cross-*site* fetch/XHR -- which is exactly
+# what Vercel (*.vercel.app) -> Render (*.onrender.com) is, two unrelated domains. `None`
+# is required there, and `None` requires `Secure`, so this is coupled to COOKIE_SECURE
+# rather than a separate env var: there's no deployed configuration where cross-site
+# cookies are needed but HTTPS isn't already in place.
+COOKIE_SAMESITE = "none" if COOKIE_SECURE else "lax"
+
 _hasher = PasswordHasher()
 
 
@@ -126,7 +135,7 @@ def set_session_cookie(response: Response, token: str) -> None:
         key=SESSION_COOKIE_NAME,
         value=token,
         httponly=True,
-        samesite="lax",
+        samesite=COOKIE_SAMESITE,
         secure=COOKIE_SECURE,
         path="/",
     )
