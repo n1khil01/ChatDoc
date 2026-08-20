@@ -1,0 +1,51 @@
+# Render Blueprint (PROJECT_PLAN.md §7 Phase 4 "Vercel + Render (Docker) + Neon"): defines
+# both services from the one Dockerfile ("one image, two roles" -- see api/worker.py's
+# docstring) as code, so they're created together from one Blueprint deploy instead of two
+# separate manual service setups that can drift out of sync with each other.
+#
+# Secrets (sync: false below) are NOT set here -- Render prompts for them once at Blueprint
+# creation time and stores them per-service; they are never committed to this file or the repo.
+services:
+  - type: web
+    name: chatdoc-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: ohio
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+
+  - type: worker
+    name: chatdoc-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: uv run python -m api.worker
+    region: ohio
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
