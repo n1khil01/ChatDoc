@@ -24,6 +24,8 @@ services:
     envVars:
       - key: RUN_WORKER_INLINE
         value: "true"
+      - key: COOKIE_SECURE
+        value: "1"
       - key: DATABASE_URL
         sync: false
       - key: GEMINI_API_KEY

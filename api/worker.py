@@ -95,7 +95,17 @@ def process_job(job: JobRow) -> None:
 
             on_progress, progress_state = _make_progress_writer(job.document_id)
             with get_conn() as conn:
-                ingest_pdf(conn, pdf_path, doc_key=job.doc_key, on_progress=on_progress)
+                ingest_pdf(
+                    conn,
+                    pdf_path,
+                    doc_key=job.doc_key,
+                    on_progress=on_progress,
+                    # job.pdf_path is the storage key set at upload time -- pdf_path (above)
+                    # may just be a throwaway temp file for the duration of this ingest (see
+                    # ingest_pdf's source_path docstring), and must never leak into the DB as
+                    # source_path or the document's real storage key is lost for good.
+                    source_path=job.pdf_path,
+                )
         mark_document_ready(job.document_id, chunk_count=progress_state["chunk_count"])
         complete_job(job.id)
         log.info("job %s document %s done", job.id, job.document_id)

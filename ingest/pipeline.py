@@ -28,6 +28,7 @@ def ingest_pdf(
     excluded_pages: frozenset[int] = frozenset(),
     doc_key: str | None = None,
     on_progress: ProgressFn | None = None,
+    source_path: str | None = None,
 ) -> int:
     """doc_key overrides the `documents.doc_name` used for upsert/dedup -- needed when the
     same PDF is ingested more than once under different page exclusions (e.g. eval's N1
@@ -38,6 +39,14 @@ def ingest_pdf(
     advances so the API layer can surface live ingest progress to the client. It is only
     ever a reporting hook -- ingestion does not branch on it, and a raising callback would
     fail the ingest, so callers must keep it cheap and total.
+
+    source_path is the value stored in documents.source_path -- the durable storage key/path
+    clients later fetch the file from. Defaults to str(pdf_path) for eval/CLI callers that
+    read straight off local disk. api/worker.py passes the job's real storage key explicitly:
+    pdf_path there may be a throwaway temp file (R2Storage.open_local downloads-then-deletes
+    it for the duration of ingestion only), which must never end up as source_path -- that
+    file is gone the moment ingestion finishes, permanently orphaning the document's real
+    storage key that create_pending_document already set at upload time.
     """
     def report(stage: str, current: int = 0, total: int = 0) -> None:
         if on_progress is not None:
@@ -49,7 +58,7 @@ def ingest_pdf(
     page_count = pymupdf.open(pdf_path).page_count
     report("reading", page_count, page_count)
 
-    document_id = upsert_document(conn, doc_name, str(pdf_path), page_count)
+    document_id = upsert_document(conn, doc_name, source_path or str(pdf_path), page_count)
     delete_chunks_for_document(conn, document_id)
 
     report("chunking", 0, page_count)
