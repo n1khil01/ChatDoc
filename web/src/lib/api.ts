@@ -31,6 +31,13 @@ function captureCsrfToken(res: Response): void {
   if (token) csrfToken = token
 }
 
+// Exposed for callers that can't go through request()/uploadDocument() below -- e.g.
+// queryStream.ts, which hand-rolls its own fetch because EventSource can't send a POST
+// body, custom headers, or credentials the way SSE querying needs here.
+export function getCsrfToken(): string | null {
+  return csrfToken
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const method = (init?.method ?? 'GET').toUpperCase()
   const headers = new Headers(init?.headers)

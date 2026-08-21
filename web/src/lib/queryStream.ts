@@ -6,12 +6,7 @@
 // has no way to describe SSE event shapes. Keep these in sync with the `_sse(...)` calls
 // in api/routes_query.py by hand.
 
-import { API_URL } from './api'
-
-function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
-  return match ? decodeURIComponent(match[1]) : null
-}
+import { API_URL, getCsrfToken } from './api'
 
 export interface RetrievalEvent {
   searched: { chunk_id: number; page: number }[]
@@ -61,7 +56,7 @@ export async function* streamQuery(
   question: string,
   signal: AbortSignal,
 ): AsyncGenerator<QueryEvent> {
-  const csrf = readCookie('chatdoc_csrf')
+  const csrf = getCsrfToken()
   const headers = new Headers({ 'Content-Type': 'application/json' })
   if (csrf) headers.set('x-csrf-token', csrf)
 
