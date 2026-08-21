@@ -68,16 +68,22 @@ def ingest_pdf(
         on_page=lambda done, total, chunks: report("chunking", done, total),
     )
 
-    rows: list[dict] = []
-    texts = [c.text for c in doc_chunks.chunks]
-    embeddings: list[list[float]] = []
-    report("embedding", 0, len(texts))
-    for start in range(0, len(texts), EMBED_BATCH):
-        embeddings.extend(embed_texts(texts[start : start + EMBED_BATCH]))
-        report("embedding", min(start + EMBED_BATCH, len(texts)), len(texts))
+    # Batches are embedded *and* written to Postgres one at a time rather than
+    # accumulating the whole document's texts/embeddings/rows in memory and inserting
+    # once at the end -- on Render's free tier the ingest worker runs inline in the same
+    # 512MB process as the web server (api/app.py's RUN_WORKER_INLINE), and holding an
+    # entire long filing's chunks + embeddings alongside the already-loaded embedding
+    # model was enough to OOM the whole process, killing web requests along with it.
+    total_chunks = len(doc_chunks.chunks)
+    report("embedding", 0, total_chunks)
+    report("indexing", 0, total_chunks)
+    written = 0
+    for start in range(0, total_chunks, EMBED_BATCH):
+        batch = doc_chunks.chunks[start : start + EMBED_BATCH]
+        batch_embeddings = embed_texts([c.text for c in batch])
+        report("embedding", min(start + EMBED_BATCH, total_chunks), total_chunks)
 
-    for chunk, emb in zip(doc_chunks.chunks, embeddings):
-        rows.append(
+        rows = [
             {
                 "page_num": chunk.page_num,
                 "chunk_type": chunk.chunk_type,
@@ -89,9 +95,10 @@ def ingest_pdf(
                 "bbox": chunk.bbox,
                 "embedding": emb,
             }
-        )
+            for chunk, emb in zip(batch, batch_embeddings)
+        ]
+        insert_chunks(conn, document_id, rows, start_index=written)
+        written += len(rows)
+        report("indexing", written, total_chunks)
 
-    report("indexing", 0, len(rows))
-    insert_chunks(conn, document_id, rows)
-    report("indexing", len(rows), len(rows))
     return document_id

@@ -71,10 +71,16 @@ def delete_chunks_for_document(conn, document_id: int) -> None:
     conn.execute("DELETE FROM chunks WHERE document_id = %s", (document_id,))
 
 
-def insert_chunks(conn, document_id: int, rows: list[dict]) -> None:
-    """rows: list of dicts with keys matching the chunks table (embedding as list[float])."""
+def insert_chunks(conn, document_id: int, rows: list[dict], start_index: int = 0) -> None:
+    """rows: list of dicts with keys matching the chunks table (embedding as list[float]).
+
+    start_index offsets `chunk_index` so a caller can insert a document's chunks in
+    batches (ingest/pipeline.py, to bound peak memory) without every batch's rows
+    colliding on index 0..len(batch) -- chunk_index must stay a stable ordinal across the
+    whole document regardless of how many insert_chunks calls it took to write it.
+    """
     with conn.cursor() as cur:
-        for i, r in enumerate(rows):
+        for i, r in enumerate(rows, start=start_index):
             cur.execute(
                 """
                 INSERT INTO chunks (
