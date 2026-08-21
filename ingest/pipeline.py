@@ -76,7 +76,6 @@ def ingest_pdf(
     # model was enough to OOM the whole process, killing web requests along with it.
     total_chunks = len(doc_chunks.chunks)
     report("embedding", 0, total_chunks)
-    report("indexing", 0, total_chunks)
     written = 0
     for start in range(0, total_chunks, EMBED_BATCH):
         batch = doc_chunks.chunks[start : start + EMBED_BATCH]
@@ -97,8 +96,16 @@ def ingest_pdf(
             }
             for chunk, emb in zip(batch, batch_embeddings)
         ]
+        # Inserted per-batch (memory bound, see comment above), but reported under the
+        # "embedding" stage rather than flipping to "indexing" every batch -- toggling the
+        # UI's stage label back and forth on every 32-chunk batch would read as broken,
+        # and this insert is comparatively fast next to the embedding call it follows, so
+        # there's no meaningful wait to surface as its own stage until the whole loop ends.
         insert_chunks(conn, document_id, rows, start_index=written)
         written += len(rows)
-        report("indexing", written, total_chunks)
 
+    # By the time we get here, every row is already in Postgres -- "indexing" reports done
+    # in one step rather than 0 -> total, since the incremental writes above already did
+    # the real work under the "embedding" label.
+    report("indexing", total_chunks, total_chunks)
     return document_id
