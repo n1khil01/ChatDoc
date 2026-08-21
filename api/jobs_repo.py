@@ -78,11 +78,23 @@ def complete_job(job_id: int) -> None:
 
 def fail_job(job_id: int, error: str) -> bool:
     """Requeue the job for another attempt if it has budget left, else dead-letter it.
-    Returns True if the job will be retried, False if it is now dead-lettered."""
+    Returns True if the job will be retried, False if it is now dead-lettered.
+
+    Deleting a document cascades to its `jobs` row (api/worker.py's process_job
+    docstring), and that delete can land while this same job is mid-flight -- its next
+    write (e.g. insert_chunks) then fails with a FK violation, landing here to record the
+    failure, except the row this is about to look up is already gone too. Unpacking None
+    here used to crash the caller's `except` block itself, which propagated out of
+    run_forever's loop and silently killed the whole ingest-worker thread -- after which
+    no job, for any document, would ever be claimed again until the process restarted.
+    Treating an already-gone job as "nothing left to fail" (False, matching the
+    dead-lettered / no-retry return) keeps this a no-op instead."""
     with get_conn() as conn:
         row = conn.execute(
             "SELECT attempts, max_attempts FROM jobs WHERE id = %s", (job_id,)
         ).fetchone()
+        if row is None:
+            return False
         attempts, max_attempts = row
         if attempts < max_attempts:
             conn.execute(
