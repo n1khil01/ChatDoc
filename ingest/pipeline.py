@@ -62,26 +62,31 @@ def ingest_pdf(
     delete_chunks_for_document(conn, document_id)
 
     report("chunking", 0, page_count)
-    doc_chunks = chunk_pdf(
+
+    # chunk_pdf now yields chunks page-by-page instead of returning the whole document's
+    # chunk list at once (see its docstring), and this loop embeds + writes each
+    # EMBED_BATCH-sized group as it's pulled off that generator -- so chunking, embedding,
+    # and inserting are all interleaved, and at most one batch's worth of chunks,
+    # embeddings, and rows is ever alive in memory at once, on top of the already-loaded
+    # embedding model. On Render's free tier the ingest worker runs inline in the same
+    # 512MB process as the web server (api/app.py's RUN_WORKER_INLINE), and materializing
+    # an entire long filing's chunks/embeddings/rows before writing any of it was enough
+    # to OOM the whole process, killing web requests along with it.
+    chunks_iter = chunk_pdf(
         pdf_path,
         excluded_pages=excluded_pages,
         on_page=lambda done, total, chunks: report("chunking", done, total),
     )
 
-    # Batches are embedded *and* written to Postgres one at a time rather than
-    # accumulating the whole document's texts/embeddings/rows in memory and inserting
-    # once at the end -- on Render's free tier the ingest worker runs inline in the same
-    # 512MB process as the web server (api/app.py's RUN_WORKER_INLINE), and holding an
-    # entire long filing's chunks + embeddings alongside the already-loaded embedding
-    # model was enough to OOM the whole process, killing web requests along with it.
-    total_chunks = len(doc_chunks.chunks)
-    report("embedding", 0, total_chunks)
     written = 0
-    for start in range(0, total_chunks, EMBED_BATCH):
-        batch = doc_chunks.chunks[start : start + EMBED_BATCH]
-        batch_embeddings = embed_texts([c.text for c in batch])
-        report("embedding", min(start + EMBED_BATCH, total_chunks), total_chunks)
+    seen = 0
+    batch: list = []
 
+    def flush_batch() -> None:
+        nonlocal batch, written
+        if not batch:
+            return
+        embeddings = embed_texts([c.text for c in batch])
         rows = [
             {
                 "page_num": chunk.page_num,
@@ -94,18 +99,29 @@ def ingest_pdf(
                 "bbox": chunk.bbox,
                 "embedding": emb,
             }
-            for chunk, emb in zip(batch, batch_embeddings)
+            for chunk, emb in zip(batch, embeddings)
         ]
-        # Inserted per-batch (memory bound, see comment above), but reported under the
-        # "embedding" stage rather than flipping to "indexing" every batch -- toggling the
-        # UI's stage label back and forth on every 32-chunk batch would read as broken,
-        # and this insert is comparatively fast next to the embedding call it follows, so
-        # there's no meaningful wait to surface as its own stage until the whole loop ends.
         insert_chunks(conn, document_id, rows, start_index=written)
         written += len(rows)
+        batch = []
 
-    # By the time we get here, every row is already in Postgres -- "indexing" reports done
-    # in one step rather than 0 -> total, since the incremental writes above already did
-    # the real work under the "embedding" label.
-    report("indexing", total_chunks, total_chunks)
+    # The true total chunk count isn't known until chunking finishes -- unlike the old
+    # eager version, there's no upfront len(doc_chunks.chunks) to report against. `seen`
+    # is used as a running stand-in: it under-reports the true total until the last page
+    # is chunked, then becomes exact. The UI's progress bar (IngestProgress.tsx) already
+    # clamps to a monotonic high-water mark, so this can only ever plateau, never regress.
+    report("embedding", 0, 0)
+    for chunk in chunks_iter:
+        batch.append(chunk)
+        seen += 1
+        if len(batch) >= EMBED_BATCH:
+            flush_batch()
+            report("embedding", written, seen)
+    flush_batch()
+    report("embedding", written, seen)
+
+    # Every row is already in Postgres by this point (inserted per-batch above) -- report
+    # "indexing" done in one step rather than 0 -> total, since there's no separate wait
+    # left to surface as its own stage.
+    report("indexing", written, written)
     return document_id

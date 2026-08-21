@@ -14,8 +14,8 @@ this project does not silently ingest nothing.
 from __future__ import annotations
 
 import re
-from collections.abc import Callable
-from dataclasses import dataclass, field
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 from pathlib import Path
 
 import pymupdf
@@ -56,12 +56,6 @@ class Chunk:
     unit_currency: str | None = None
     unit_note: str | None = None
     bbox: tuple[float, float, float, float] | None = None
-
-
-@dataclass
-class DocumentChunks:
-    page_count: int
-    chunks: list[Chunk] = field(default_factory=list)
 
 
 def _detect_scale(text: str) -> tuple[str | None, str | None, str | None]:
@@ -161,9 +155,16 @@ def chunk_pdf(
     pdf_path: Path,
     excluded_pages: frozenset[int] = frozenset(),
     on_page: Callable[[int, int, int], None] | None = None,
-) -> DocumentChunks:
+) -> Iterator[Chunk]:
     """Table-aware chunking: one atomic markdown chunk per detected table (with scale/unit
     metadata + bbox), plus paragraph-grouped prose chunks carrying the nearest section header.
+
+    Yields chunks page-by-page as they're produced rather than returning the whole
+    document's chunks at once -- on Render's free tier the ingest worker runs inline in
+    the same 512MB process as the web server, and materializing every chunk of a long
+    document before embedding even starts was one more thing standing between a normal
+    ingest and an OOM kill (see ingest/pipeline.py, which now embeds and writes each
+    batch as it's pulled from this generator instead of listifying it first).
 
     `excluded_pages` drops those pages entirely (used for N1 evidence-ablation negatives,
     mirroring eval/run_retrieval_eval.py's naive baseline behavior).
@@ -171,17 +172,21 @@ def chunk_pdf(
     `on_page(pages_done, page_count, chunks_so_far)` is called after each page so a caller
     can report live progress. Page-level is the right granularity here: table detection is
     the slow part of this loop, so per-page is both cheap to emit and visibly monotonic.
+
+    Raises EmptyTextLayerError once the whole document has been walked with no extractable
+    text found on any page -- since that can only be known after the last page, a caller
+    that only partially consumes this generator will never see it raised.
     """
     doc = pymupdf.open(pdf_path)
     try:
         page_count = doc.page_count
         any_text = False
-        result = DocumentChunks(page_count=page_count)
+        chunks_so_far = 0
 
         for page_num in range(page_count):
             if page_num in excluded_pages:
                 if on_page is not None:
-                    on_page(page_num + 1, page_count, len(result.chunks))
+                    on_page(page_num + 1, page_count, chunks_so_far)
                 continue
             page = doc.load_page(page_num)
             page_text = page.get_text()
@@ -190,6 +195,7 @@ def chunk_pdf(
 
             headers = _extract_headers(page)
             table_bboxes: list[tuple[float, float, float, float]] = []
+            page_chunks: list[Chunk] = []
 
             try:
                 found = page.find_tables()
@@ -209,7 +215,7 @@ def chunk_pdf(
                 context = page_text
                 scale, currency, note = _detect_scale(md + "\n" + context)
                 nearest_header = _nearest_header(headers, y0)
-                result.chunks.append(
+                page_chunks.append(
                     Chunk(
                         page_num=page_num,
                         chunk_type="table",
@@ -229,10 +235,10 @@ def chunk_pdf(
             buf_header: str | None = None
             buf_bboxes: list[tuple[float, float, float, float]] = []
 
-            def flush():
+            def flush() -> list[Chunk]:
                 nonlocal buf, buf_len, buf_header, buf_bboxes
                 if not buf:
-                    return
+                    return []
                 joined = "\n".join(buf)
                 # Union of the source paragraphs' bboxes -- an honest approximation (the
                 # region a chunk's text came from, not a word-level highlight) that still
@@ -243,21 +249,21 @@ def chunk_pdf(
                     max(b[2] for b in buf_bboxes),
                     max(b[3] for b in buf_bboxes),
                 )
-                for piece in _split_prose(joined):
-                    prefixed = f"{buf_header}\n\n{piece}" if buf_header else piece
-                    result.chunks.append(
-                        Chunk(
-                            page_num=page_num,
-                            chunk_type="prose",
-                            text=_clean(prefixed),
-                            section_header=_clean(buf_header) if buf_header else None,
-                            bbox=union_bbox,
-                        )
+                flushed = [
+                    Chunk(
+                        page_num=page_num,
+                        chunk_type="prose",
+                        text=_clean(f"{buf_header}\n\n{piece}" if buf_header else piece),
+                        section_header=_clean(buf_header) if buf_header else None,
+                        bbox=union_bbox,
                     )
+                    for piece in _split_prose(joined)
+                ]
                 buf = []
                 buf_len = 0
                 buf_header = None
                 buf_bboxes = []
+                return flushed
 
             for text, bbox in paragraphs:
                 header = _nearest_header(headers, bbox[1])
@@ -269,23 +275,24 @@ def chunk_pdf(
                 # reset in flush() so a later chunk on the same page picks up its own
                 # section's header rather than reusing the first chunk's.
                 if buf and (buf_len + len(text) > PROSE_CHUNK_CHARS or header != buf_header):
-                    flush()
+                    page_chunks.extend(flush())
                 if buf_header is None:
                     buf_header = header
                 buf.append(text)
                 buf_len += len(text)
                 buf_bboxes.append(bbox)
-            flush()
+            page_chunks.extend(flush())
+
+            chunks_so_far += len(page_chunks)
+            yield from page_chunks
 
             if on_page is not None:
-                on_page(page_num + 1, page_count, len(result.chunks))
+                on_page(page_num + 1, page_count, chunks_so_far)
 
         if not any_text:
             raise EmptyTextLayerError(
                 f"{pdf_path}: no extractable text on any non-excluded page "
                 "(scanned PDF with no OCR is out of scope per PROJECT_PLAN.md)."
             )
-
-        return result
     finally:
         doc.close()
