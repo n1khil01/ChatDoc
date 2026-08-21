@@ -14,7 +14,7 @@ from api.auth import (
     verify_password,
     SESSION_COOKIE_NAME,
 )
-from api.csrf import issue_csrf_cookie
+from api.csrf import CSRF_COOKIE_NAME, issue_csrf_cookie
 from api.deps import get_current_user_id
 from api.schemas import LoginRequest, RegisterRequest, UserResponse
 from fastapi import Request
@@ -62,9 +62,14 @@ def logout(request: Request, response: Response):
 
 
 @router.get("/me", response_model=UserResponse)
-def me(user_id: int = Depends(get_current_user_id)):
+def me(request: Request, response: Response, user_id: int = Depends(get_current_user_id)):
     with get_conn() as conn:
         row = conn.execute("SELECT email FROM users WHERE id = %s", (user_id,)).fetchone()
     if row is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "not authenticated")
+    # A page reload loses the frontend's in-memory CSRF token (api/csrf.py), so the
+    # app-boot me() call must hand it back out too, not just register/login. Resend the
+    # existing cookie value rather than rotate it -- an in-flight mutating request that
+    # already read the old token must not be invalidated by this GET racing it.
+    issue_csrf_cookie(response, token=request.cookies.get(CSRF_COOKIE_NAME))
     return UserResponse(id=user_id, email=row[0])

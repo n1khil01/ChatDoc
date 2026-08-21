@@ -57,6 +57,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # The frontend and API are unrelated origins (Vercel/Render), so the frontend can
+    # never read the CSRF cookie via document.cookie -- it reads this header instead
+    # (api/csrf.py). Cross-origin fetch hides all response headers from JS by default
+    # except a small allowlist, so this one must be explicitly exposed.
+    expose_headers=["X-CSRF-Token"],
 )
 
 app.include_router(auth_router)

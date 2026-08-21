@@ -18,9 +18,17 @@ export class ApiError extends Error {
   }
 }
 
-function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
-  return match ? decodeURIComponent(match[1]) : null
+// The CSRF cookie lives on the API's origin (Render), not the frontend's (Vercel) --
+// two unrelated origins, so document.cookie on this page can never see it, CSRF cookie
+// attributes notwithstanding (api/csrf.py has the full writeup). The API hands the same
+// value back via the `x-csrf-token` *response* header on register/login/me instead;
+// this module-level var is the frontend's only copy of it, refreshed on every response
+// that carries the header and cleared on logout.
+let csrfToken: string | null = null
+
+function captureCsrfToken(res: Response): void {
+  const token = res.headers.get('x-csrf-token')
+  if (token) csrfToken = token
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -28,10 +36,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers)
   const isMutating = method !== 'GET' && method !== 'HEAD'
 
-  if (isMutating) {
-    const csrf = readCookie('chatdoc_csrf')
-    if (csrf) headers.set('x-csrf-token', csrf)
-  }
+  if (isMutating && csrfToken) headers.set('x-csrf-token', csrfToken)
 
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -39,6 +44,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers,
     credentials: 'include',
   })
+  captureCsrfToken(res)
 
   if (!res.ok) {
     let message = res.statusText
@@ -81,8 +87,12 @@ export function login(email: string, password: string) {
   })
 }
 
-export function logout() {
-  return request<void>('/auth/logout', { method: 'POST' })
+export async function logout(): Promise<void> {
+  try {
+    await request<void>('/auth/logout', { method: 'POST' })
+  } finally {
+    csrfToken = null
+  }
 }
 
 export function me() {
@@ -111,9 +121,8 @@ export function documentFileUrl(id: number) {
 export async function uploadDocument(file: File): Promise<Document> {
   const form = new FormData()
   form.append('file', file)
-  const csrf = readCookie('chatdoc_csrf')
   const headers = new Headers()
-  if (csrf) headers.set('x-csrf-token', csrf)
+  if (csrfToken) headers.set('x-csrf-token', csrfToken)
 
   const res = await fetch(`${API_URL}/documents`, {
     method: 'POST',
@@ -121,6 +130,7 @@ export async function uploadDocument(file: File): Promise<Document> {
     headers,
     credentials: 'include',
   })
+  captureCsrfToken(res)
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new ApiError(res.status, body.detail ?? res.statusText)
