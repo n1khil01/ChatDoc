@@ -1,0 +1,222 @@
+[
+  {
+    "financebench_id": "financebench_id_03029",
+    "question": "What is the FY2018 capital expenditure amount (in USD millions) for 3M? Give a response to the question by relying on the details shown in the cash flow statement.",
+    "doc_name": "3M_2018_10K",
+    "gold_value": 1577.0,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_04672",
+    "question": "Assume that you are a public equities analyst. Answer the following question by primarily using information that is shown in the balance sheet: what is the year end FY2018 net PPNE for 3M? Answer in USD billions.",
+    "doc_name": "3M_2018_10K",
+    "gold_value": 8.7,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_01865",
+    "question": "If we exclude the impact of M&A, which segment has dragged down 3M's overall growth in 2022?",
+    "doc_name": "3M_2022_10K",
+    "gold_value": 0.9,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_02987",
+    "question": "What is the FY2019 fixed asset turnover ratio for Activision Blizzard? Fixed asset turnover ratio is defined as: FY2019 revenue / (average PP&E between FY2018 and FY2019). Round your answer to two decimal places. Base your judgments on the information provided primarily in the statement of income and the statement of financial position.",
+    "doc_name": "ACTIVISIONBLIZZARD_2019_10K",
+    "gold_value": 24.26,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_07966",
+    "question": "What is the FY2017 - FY2019 3 year average of capex as a % of revenue for Activision Blizzard? Answer in units of percents and round to one decimal place. Calculate (or extract) the answer from the statement of income and the cash flow statement.",
+    "doc_name": "ACTIVISIONBLIZZARD_2019_10K",
+    "gold_value": 1.9,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_04735",
+    "question": "You are an investment banker and your only resource(s) to answer the following question is (are): the statement of financial position and the cash flow statement. Here's the question: what is the FY2015 operating cash flow ratio for Adobe? Operating cash flow ratio is defined as: cash from operations / total current liabilities. Round your answer to two decimal places.",
+    "doc_name": "ADOBE_2015_10K",
+    "gold_value": 0.66,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_07507",
+    "question": "What is Adobe's year-over-year change in unadjusted operating income from FY2015 to FY2016 (in units of percents and round to one decimal place)? Give a solution to the question by using the income statement.",
+    "doc_name": "ADOBE_2016_10K",
+    "gold_value": 65.4,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_03856",
+    "question": "What is the FY2017 operating cash flow ratio for Adobe? Operating cash flow ratio is defined as: cash from operations / total current liabilities. Round your answer to two decimal places. Please utilize information provided primarily within the balance sheet and the cash flow statement.",
+    "doc_name": "ADOBE_2017_10K",
+    "gold_value": 0.83,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_01319",
+    "question": "What is the quantity of restructuring costs directly outlined in AES Corporation's income statements for FY2022? If restructuring costs are not explicitly outlined then state 0.",
+    "doc_name": "AES_2022_10K",
+    "gold_value": 0.0,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_10420",
+    "question": "Based on the information provided primarily in the statement of financial position and the statement of income, what is AES's FY2022 return on assets (ROA)? ROA is defined as: FY2022 net income / (average total assets between FY2021 and FY2022). Round your answer to two decimal places.",
+    "doc_name": "AES_2022_10K",
+    "gold_value": -0.02,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_06655",
+    "question": "What is Amazon's FY2017 days payable outstanding (DPO)? DPO is defined as: 365 * (average accounts payable between FY2016 and FY2017) / (FY2017 COGS + change in inventory between FY2016 and FY2017). Round your answer to two decimal places. Address the question by using the line items and information shown within the balance sheet and the P&L statement.",
+    "doc_name": "AMAZON_2017_10K",
+    "gold_value": 93.86,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_08135",
+    "question": "What is Amazon's year-over-year change in revenue from FY2016 to FY2017 (in units of percents and round to one decimal place)? Calculate what was asked by utilizing the line items clearly shown in the statement of income.",
+    "doc_name": "AMAZON_2017_10K",
+    "gold_value": 30.8,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_08286",
+    "question": "By drawing conclusions from the information stated only in the income statement, what is Amazon's FY2019 net income attributable to shareholders (in USD millions)?",
+    "doc_name": "AMAZON_2019_10K",
+    "gold_value": 11588.0,
+    "model_value": 11588.0,
+    "answered": false,
+    "gate_reason": "value 11588.0 not found in any cited chunk",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_03882",
+    "question": "What is Amcor's year end FY2020 net AR (in USD millions)? Address the question by adopting the perspective of a financial analyst who can only use the details shown within the balance sheet.",
+    "doc_name": "AMCOR_2020_10K",
+    "gold_value": 1616.0,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_00684",
+    "question": "Does AMCOR have an improving gross margin profile as of FY2023? If gross margin is not a useful metric for a company like this, then state that and explain why.",
+    "doc_name": "AMCOR_2023_10K",
+    "gold_value": 0.8,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_01936",
+    "question": "What is the nature & purpose of AMCOR's restructuring liability as oF Q2 of FY2023 close?",
+    "doc_name": "AMCOR_2023Q2_10Q",
+    "gold_value": 87.0,
+    "model_value": null,
+    "answered": true,
+    "gate_reason": null,
+    "category": "fiscal-year confusion",
+    "note": "cited chunk's year doesn't match doc_period/question"
+  },
+  {
+    "financebench_id": "financebench_id_03069",
+    "question": "Answer the following question as if you are an equity research analyst and have lost internet connection so you do not have access to financial metric providers. According to the details clearly outlined within the P&L statement and the statement of cash flows, what is the FY2015 depreciation and amortization (D&A from cash flow statement) % margin for AMD?",
+    "doc_name": "AMD_2015_10K",
+    "gold_value": 4.2,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_00222",
+    "question": "Does AMD have a reasonably healthy liquidity profile based on its quick ratio for FY22? If the quick ratio is not relevant to measure liquidity, please state that and explain why.",
+    "doc_name": "AMD_2022_10K",
+    "gold_value": 1.57,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "model reported insufficient evidence",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  },
+  {
+    "financebench_id": "financebench_id_01198",
+    "question": "What drove revenue change as of the FY22 for AMD?",
+    "doc_name": "AMD_2022_10K",
+    "gold_value": 2022.0,
+    "model_value": null,
+    "answered": true,
+    "gate_reason": null,
+    "category": "genuine hallucination",
+    "note": "cited the right chunk but still extracted the wrong number"
+  },
+  {
+    "financebench_id": "financebench_id_01279",
+    "question": "Among operations, investing, and financing activities, which brought in the most (or lost the least) cash flow for AMD in FY22?",
+    "doc_name": "AMD_2022_10K",
+    "gold_value": 2022.0,
+    "model_value": null,
+    "answered": false,
+    "gate_reason": "best claim-support score -0.2898 below threshold 0.0",
+    "category": "false refusal",
+    "note": "gate refused despite 10 chunks retrieved; whether the evidence page was actually among them can't be checked post-hoc (see script docstring)"
+  }
+]

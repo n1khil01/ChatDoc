@@ -13,6 +13,7 @@ from pgvector import HalfVector
 
 from ingest.embeddings import embed_query
 from ingest.reranker import rerank as rerank_fn
+from ingest.tracing import stage_span
 
 RRF_K = 60
 
@@ -93,14 +94,16 @@ def hybrid_retrieve_scored(
     The scores are needed by eval/gate.py's L1 margin experiment (top1 - top2 rerank score),
     which is why this is the primitive and hybrid_retrieve() below is the thin wrapper.
     """
-    dense = dense_search(conn, document_id, query, dense_n)
-    sparse = sparse_search(conn, document_id, query, sparse_n)
-    fused = rrf_fuse([dense, sparse])[:rrf_top_n]
+    with stage_span("retrieve", document_id=document_id):
+        dense = dense_search(conn, document_id, query, dense_n)
+        sparse = sparse_search(conn, document_id, query, sparse_n)
+        fused = rrf_fuse([dense, sparse])[:rrf_top_n]
     if not fused:
         return []
 
     candidates = [c for c, _ in fused]
-    scores = rerank_fn(query, [c.text for c in candidates])
+    with stage_span("rerank", document_id=document_id, candidate_count=len(candidates)):
+        scores = rerank_fn(query, [c.text for c in candidates])
     reranked = sorted(zip(candidates, scores), key=lambda t: -t[1])
     return reranked[:rerank_top_k]
 

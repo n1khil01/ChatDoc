@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from api.documents_repo import mark_document_failed
 from ingest.db import get_conn
 
 VISIBILITY_TIMEOUT_S = 600
@@ -44,7 +45,15 @@ def enqueue_job(document_id: int, doc_key: str, pdf_path: str) -> int:
 def claim_job() -> JobRow | None:
     """Claim the oldest job that is either freshly queued or whose previous claim's
     visibility timeout has lapsed (the worker that held it died -- Render spin-down,
-    OOM kill, etc). Returns None if nothing is claimable right now."""
+    OOM kill, etc). Returns None if nothing is claimable right now.
+
+    Excludes jobs that have already exhausted `max_attempts`: `fail_job`'s normal
+    dead-letter path only runs when the worker survives long enough to catch its own
+    exception, which a SIGKILL/OOM never allows. Without this guard, a job whose ingest
+    itself reliably crashes the process (a "poison pill") gets reclaimed and re-crashed
+    forever every time its visibility timeout lapses, since nothing else ever marks it
+    'failed'. `_reap_exhausted_jobs` handles jobs already past that point (e.g. from
+    before this guard existed)."""
     with get_conn() as conn:
         row = conn.execute(
             """
@@ -55,8 +64,9 @@ def claim_job() -> JobRow | None:
                 updated_at = now()
             WHERE id = (
                 SELECT id FROM jobs
-                WHERE status = 'queued'
-                   OR (status = 'processing' AND visible_at < now())
+                WHERE (status = 'queued'
+                       OR (status = 'processing' AND visible_at < now()))
+                  AND attempts < max_attempts
                 ORDER BY created_at
                 FOR UPDATE SKIP LOCKED
                 LIMIT 1
@@ -65,7 +75,32 @@ def claim_job() -> JobRow | None:
             """,
             (VISIBILITY_TIMEOUT_S,),
         ).fetchone()
-    return JobRow(*row) if row else None
+    if row:
+        return JobRow(*row)
+    _reap_exhausted_jobs()
+    return None
+
+
+def _reap_exhausted_jobs() -> None:
+    """Dead-letter any job stuck in 'processing' past its visibility timeout that has
+    already hit `max_attempts` -- the case `claim_job`'s guard above prevents going
+    forward, but doesn't retroactively fix for a job already in that state."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            UPDATE jobs
+            SET status = 'failed',
+                last_error = 'exceeded max_attempts (worker likely crashed before it '
+                             'could report the failure normally, e.g. OOM)',
+                updated_at = now()
+            WHERE status = 'processing' AND visible_at < now() AND attempts >= max_attempts
+            RETURNING document_id
+            """
+        ).fetchall()
+    for (document_id,) in rows:
+        mark_document_failed(
+            document_id, "ingest failed repeatedly and was stopped after max attempts"
+        )
 
 
 def complete_job(job_id: int) -> None:

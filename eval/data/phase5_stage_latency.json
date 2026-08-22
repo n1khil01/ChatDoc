@@ -1,0 +1,61 @@
+{
+  "ingest_and_retrieval_stages": {
+    "reading": {
+      "n": 4,
+      "p50_ms": 0.6,
+      "p95_ms": 3.2,
+      "mean_ms": 1.4
+    },
+    "chunking": {
+      "n": 4,
+      "p50_ms": 2997.5,
+      "p95_ms": 5449.8,
+      "mean_ms": 3272.5
+    },
+    "embedding": {
+      "n": 4,
+      "p50_ms": 91599.4,
+      "p95_ms": 131519.8,
+      "mean_ms": 85994.1
+    },
+    "indexing": {
+      "n": 4,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "mean_ms": 0.0
+    },
+    "retrieve": {
+      "n": 6,
+      "p50_ms": 200.9,
+      "p95_ms": 290.4,
+      "mean_ms": 202.4
+    },
+    "rerank": {
+      "n": 6,
+      "p50_ms": 2368.4,
+      "p95_ms": 3377.8,
+      "mean_ms": 2645.1
+    }
+  },
+  "generate_stage": {
+    "n": 74,
+    "p50_ms": 808.0,
+    "p95_ms": 1484.6,
+    "mean_ms": 1152.9,
+    "avg_prompt_tokens": 3978.5,
+    "avg_completion_tokens": 85.5,
+    "avg_cost_usd_per_query": 0.001407,
+    "run_id": "answerable-gate-2026-08-14",
+    "pricing": {
+      "model": "gemini-3.5-flash-lite",
+      "tier": "standard",
+      "input_per_1m_usd": 0.3,
+      "output_per_1m_usd": 2.5,
+      "source": "ai.google.dev/gemini-api/docs/pricing, fetched 2026-08-21"
+    }
+  },
+  "sample": {
+    "n_docs": 4,
+    "n_queries": 6
+  }
+}

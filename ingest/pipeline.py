@@ -7,6 +7,7 @@ Usage (library):
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -15,6 +16,7 @@ import pymupdf
 from ingest.chunker import chunk_pdf
 from ingest.db import delete_chunks_for_document, insert_chunks, upsert_document
 from ingest.embeddings import embed_texts
+from ingest.tracing import record_stage_duration
 
 EMBED_BATCH = 32
 
@@ -55,7 +57,9 @@ def ingest_pdf(
     doc_name = doc_key or pdf_path.stem
 
     report("reading", 0, 0)
+    t0 = time.perf_counter()
     page_count = pymupdf.open(pdf_path).page_count
+    record_stage_duration("reading", (time.perf_counter() - t0) * 1000, page_count=page_count)
     report("reading", page_count, page_count)
 
     document_id = upsert_document(conn, doc_name, source_path or str(pdf_path), page_count)
@@ -111,17 +115,39 @@ def ingest_pdf(
     # is chunked, then becomes exact. The UI's progress bar (IngestProgress.tsx) already
     # clamps to a monotonic high-water mark, so this can only ever plateau, never regress.
     report("embedding", 0, 0)
-    for chunk in chunks_iter:
+    chunking_ms = 0.0
+    embedding_ms = 0.0
+    chunk_iter = iter(chunks_iter)
+    while True:
+        t0 = time.perf_counter()
+        try:
+            chunk = next(chunk_iter)
+        except StopIteration:
+            break
+        chunking_ms += (time.perf_counter() - t0) * 1000
         batch.append(chunk)
         seen += 1
         if len(batch) >= EMBED_BATCH:
+            t0 = time.perf_counter()
             flush_batch()
+            embedding_ms += (time.perf_counter() - t0) * 1000
             report("embedding", written, seen)
+    t0 = time.perf_counter()
     flush_batch()
+    embedding_ms += (time.perf_counter() - t0) * 1000
     report("embedding", written, seen)
 
-    # Every row is already in Postgres by this point (inserted per-batch above) -- report
-    # "indexing" done in one step rather than 0 -> total, since there's no separate wait
-    # left to surface as its own stage.
+    # "chunking" here is time spent parsing/serializing pages into chunks (chunk_pdf's own
+    # work, including PyMuPDF table detection); "embedding" is embed_texts + insert_chunks
+    # combined, since they're interleaved per-batch above to keep memory flat and cannot be
+    # cleanly separated without materializing a batch's embeddings before its DB write.
+    record_stage_duration("chunking", chunking_ms, page_count=page_count, chunk_count=seen)
+    record_stage_duration("embedding", embedding_ms, chunk_count=written)
+
+    # Every row is already in Postgres by this point (inserted per-batch above via
+    # insert_chunks, which is also what feeds the HNSW index) -- there is no separate
+    # indexing wait to time; record a near-zero span so the stage still appears in the
+    # aggregation rather than silently reading as "never measured".
+    record_stage_duration("indexing", 0.0, chunk_count=written)
     report("indexing", written, written)
     return document_id

@@ -1,0 +1,29 @@
+{"name": "reading", "start_ns": 1787378211626657600, "end_ns": 1787378211627388600, "duration_ms": 0.731, "attributes": {"page_count": 16}, "status": "UNSET"}
+{"name": "chunking", "start_ns": 1787378238131777900, "end_ns": 1787378239566640200, "duration_ms": 1434.8623, "attributes": {"page_count": 16, "chunk_count": 97}, "status": "UNSET"}
+{"name": "embedding", "start_ns": 1787378238132333200, "end_ns": 1787378263074232700, "duration_ms": 24941.8995, "attributes": {"chunk_count": 97}, "status": "UNSET"}
+{"name": "indexing", "start_ns": 1787378238132669300, "end_ns": 1787378238132669300, "duration_ms": 0.0, "attributes": {"chunk_count": 97}, "status": "UNSET"}
+{"name": "reading", "start_ns": 1787378238137306800, "end_ns": 1787378238140968800, "duration_ms": 3.662, "attributes": {"page_count": 27}, "status": "UNSET"}
+{"name": "chunking", "start_ns": 1787378316140386100, "end_ns": 1787378317877347799, "duration_ms": 1736.961699, "attributes": {"page_count": 27, "chunk_count": 428}, "status": "UNSET"}
+{"name": "embedding", "start_ns": 1787378316141134500, "end_ns": 1787378392275607900, "duration_ms": 76134.4734, "attributes": {"chunk_count": 428}, "status": "UNSET"}
+{"name": "indexing", "start_ns": 1787378316141504100, "end_ns": 1787378316141504100, "duration_ms": 0.0, "attributes": {"chunk_count": 428}, "status": "UNSET"}
+{"name": "reading", "start_ns": 1787378316142410900, "end_ns": 1787378316142923999, "duration_ms": 0.513099, "attributes": {"page_count": 57}, "status": "UNSET"}
+{"name": "chunking", "start_ns": 1787378427589179600, "end_ns": 1787378431847220399, "duration_ms": 4258.040799, "attributes": {"page_count": 57, "chunk_count": 323}, "status": "UNSET"}
+{"name": "embedding", "start_ns": 1787378427589658200, "end_ns": 1787378534654027300, "duration_ms": 107064.3691, "attributes": {"chunk_count": 323}, "status": "UNSET"}
+{"name": "indexing", "start_ns": 1787378427589926200, "end_ns": 1787378427589926200, "duration_ms": 0.0, "attributes": {"chunk_count": 323}, "status": "UNSET"}
+{"name": "reading", "start_ns": 1787378427590789600, "end_ns": 1787378427591357000, "duration_ms": 0.5674, "attributes": {"page_count": 62}, "status": "UNSET"}
+{"name": "chunking", "start_ns": 1787378569214653900, "end_ns": 1787378574874798599, "duration_ms": 5660.144699, "attributes": {"page_count": 62, "chunk_count": 442}, "status": "UNSET"}
+{"name": "embedding", "start_ns": 1787378569215194600, "end_ns": 1787378705050701500, "duration_ms": 135835.5069, "attributes": {"chunk_count": 442}, "status": "UNSET"}
+{"name": "indexing", "start_ns": 1787378569215654200, "end_ns": 1787378569215654200, "duration_ms": 0.0, "attributes": {"chunk_count": 442}, "status": "UNSET"}
+{"name": "retrieve", "start_ns": 1787378570503219000, "end_ns": 1787378570703713600, "duration_ms": 200.4946, "attributes": {"document_id": 108}, "status": "UNSET"}
+{"name": "rerank", "start_ns": 1787378570704269400, "end_ns": 1787378573099141000, "duration_ms": 2394.8716, "attributes": {"document_id": 108, "candidate_count": 20}, "status": "UNSET"}
+{"name": "retrieve", "start_ns": 1787378573099697300, "end_ns": 1787378573302660700, "duration_ms": 202.9634, "attributes": {"document_id": 108}, "status": "UNSET"}
+{"name": "rerank", "start_ns": 1787378573303252100, "end_ns": 1787378575645158200, "duration_ms": 2341.9061, "attributes": {"document_id": 108, "candidate_count": 20}, "status": "UNSET"}
+{"name": "retrieve", "start_ns": 1787378575645797900, "end_ns": 1787378575791139700, "duration_ms": 145.3418, "attributes": {"document_id": 110}, "status": "UNSET"}
+{"name": "rerank", "start_ns": 1787378575791623700, "end_ns": 1787378577873572900, "duration_ms": 2081.9492, "attributes": {"document_id": 110, "candidate_count": 20}, "status": "UNSET"}
+{"name": "retrieve", "start_ns": 1787378577874415100, "end_ns": 1787378578019381600, "duration_ms": 144.9665, "attributes": {"document_id": 110}, "status": "UNSET"}
+{"name": "rerank", "start_ns": 1787378578019999800, "end_ns": 1787378580336601400, "duration_ms": 2316.6016, "attributes": {"document_id": 110, "candidate_count": 20}, "status": "UNSET"}
+{"name": "retrieve", "start_ns": 1787378580337322400, "end_ns": 1787378580538696800, "duration_ms": 201.3744, "attributes": {"document_id": 112}, "status": "UNSET"}
+{"name": "rerank", "start_ns": 1787378580539203600, "end_ns": 1787378583886848400, "duration_ms": 3347.6448, "attributes": {"document_id": 112, "candidate_count": 20}, "status": "UNSET"}
+{"name": "retrieve", "start_ns": 1787378583887466300, "end_ns": 1787378584206958600, "duration_ms": 319.4923, "attributes": {"document_id": 114}, "status": "UNSET"}
+{"name": "rerank", "start_ns": 1787378584207531400, "end_ns": 1787378587595425100, "duration_ms": 3387.8937, "attributes": {"document_id": 114, "candidate_count": 20}, "status": "UNSET"}
+{"name": "retrieve", "start_ns": 1787379032089124100, "end_ns": 1787379032397061600, "duration_ms": 307.9375, "attributes": {"document_id": 125}, "status": "UNSET"}
