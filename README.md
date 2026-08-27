@@ -4,7 +4,7 @@
 
 Ask a question about a 10-K or an earnings release. ChatDoc answers with a citation that jumps to the exact page and highlights the sentence the number came from. When the filing does not actually contain the answer, it says so instead of guessing.
 
-> Live demo: _add your deployed URL here_
+> Live demo: https://chat-doc-git-dev-n1khil01s-projects.vercel.app/
 
 ---
 
